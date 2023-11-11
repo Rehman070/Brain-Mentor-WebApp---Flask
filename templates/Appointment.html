@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Brain Mentor - Appointment</title>
+        <link rel="stylesheet" href="/static/style.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+         <link rel="apple-touch-icon" sizes="76x76" href="static/images/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32"
+            href="static/images/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16"
+            href="static/images/favicon-16x16.png">
+        <link rel="manifest" href="static/images/site.webmanifest">
+        <link rel="mask-icon" href="static/images/safari-pinned-tab.svg" color="#5bbad5">
+        <meta name="msapplication-TileColor" content="#da532c">
+        <meta name="theme-color" content="#ffffff">
+        <link
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@200&display=swap"
+            rel="stylesheet">
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
+            crossorigin="anonymous">
+            
+        <script src="https://kit.fontawesome.com/b33b219100.js"
+            crossorigin="anonymous"></script>
+
+    </head>
+
+    <body>
+        <!-- This is Nav Bar -->
+        <header>
+            <nav>
+                <input type="checkbox" id="check">
+                <label for="check" class="checkbtn">
+                    <i class="fas fa-bars"></i>
+                </label>
+                <label class="logo">Brain Mentor</label>
+                <ul>
+                    <li><a class="active" href="home">Home</a></li>
+                    <li><a href="detection">Detection</a></li>
+                    <li><a href="#">Doctors</a></li>
+                    <li><a href="patient_treat">Treatments</a></li>
+                    <li><a href="blog">Blogs</a></li>
+                    <li><a href="appointment" class="btn-appointment">Appointment</a></li>
+                    <li><a href="logout">Logout</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <!-- Appointment -->
+        <section class="app-bg"></section>
+             <div class="appointment-sec">
+                <div class="popup-content">
+                    <div class="appointmentt">
+                        <div class="Box">
+                            <form action>
+                                <h3>Booking Appointment</h3>
+
+                                <div class="inputBox">
+                                    <label>Name *</label>
+                                    <input type="text" required>
+                                </div>
+                                <div class="inputBox">
+                                    <label>Email *</label>
+                                    <input type="text" required>
+                                </div>
+                                <div class="inputBox">
+                                    <label>Phone *</label>
+                                    <input type="tel" required>
+                                </div>
+                                <div class="inputBox">
+                                    <label>Message (optional)</label>
+                                    <textarea name="message" id="textarea" cols="47" rows="3"></textarea>
+                                </div>
+                                <button type="submit" class="submit-btn">Submit</button>
+                              
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+          
+            <!-- Footer -->
+            <footer class="footer">
+                <div class="container">
+                    <div class="row">
+                        <div class="footer-col">
+                            <h2>Location</h2>
+                            <span><h5>Address:</h5>
+                                Pakistan Kamra Rd,<br>
+                                Attock City, 43600<br><br></span>
+                            <span><h5>Phone:</h5>(750) 435-6352</span>
+                            <span><h5>Fax:</h5>(750) 435-6352</span>
+                        </div>
+                        <div class="footer-col">
+                            <h2>Blog</h2>
+                            <ul>
+                                <li><a href="#">Right Sidebar</a></li>
+                                <li><a href="#">Left Sidebar</a></li>
+                                <li><a href="#">Full Width </a></li>
+                                <li><a href="#">Blog Grid </a></li>
+                                <li><a href="#">Blog Details </a></li>
+                            </ul>
+                        </div>
+                        <div class="footer-col">
+                            <h2>Appointment</h2>
+                            <p>Lorem ipsum dolor, sit amet consectetur<br>
+                                adipisicing elit. nemo obcaecati.</p>
+                            <div class="social-links">
+                                <a href="#"><i class="fab fa-facebook-f"></i></a>
+                                <a href="#"><i class="fab fa-twitter"></i></a>
+                                <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                                <a href="#"><i class="fab fa-google-plus"></i></a>
+                                <a href="#"><i class="fab fa-youtube"></i></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+                    <div class="copyright">
+                        <span>© 2023 BrainMentor. All rights reserved.</span>
+                    </div>
+                </div>
+            </footer>
+
+        </main>
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+            crossorigin="anonymous"></script>
+
+    </body>
+
+</html>

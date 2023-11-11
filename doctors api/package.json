@@ -1,0 +1,25 @@
+{
+  "name": "ngos_data_",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rehman070/NGOs_data_.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Rehman070/NGOs_data_/issues"
+  },
+  "homepage": "https://github.com/Rehman070/NGOs_data_#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "json-server": "^0.17.3"
+  }
+}

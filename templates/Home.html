@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Brain Mentor - Home</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" type="text/css" href="/static/style.css">
+        <link rel="stylesheet" type="text/css" href="/static/chatbot.css">
+        <link
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@200&display=swap"
+            rel="stylesheet">
+
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
+            crossorigin="anonymous">
+
+        <link rel="apple-touch-icon" sizes="76x76" href="static/images/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32"
+            href="static/images/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16"
+            href="static/images/favicon-16x16.png">
+        <link rel="manifest" href="static/images/site.webmanifest">
+        <link rel="mask-icon" href="static/images/safari-pinned-tab.svg" color="#5bbad5">
+        <meta name="msapplication-TileColor" content="#da532c">
+        <meta name="theme-color" content="#ffffff">
+        <script src="https://kit.fontawesome.com/b33b219100.js"
+            crossorigin="anonymous"></script>
+
+        <script src="/static/js/testimonail.js" defer></script>
+        <script
+            src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    </head>
+
+    <body>
+        <!-- Account Creation Message -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{category}} alert-dismissible fade show"
+                role="alert">
+                <strong>Message:</strong>{{message}}
+            </div>
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    setTimeout(function() {
+                        let alert = document.querySelector(".alert-{{category}}");
+                        if (alert) {
+                            alert.style.display = "none";
+                        }
+                    }, 2200); // 2200 milliseconds = 1 second
+                });
+            </script>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+
+        
+        <!-- This is Nav Bar -->
+        <header>
+            <nav>
+                <input type="checkbox" id="check">
+                <label for="check" class="checkbtn">
+                    <i class="fas fa-bars"></i>
+                </label>
+                <label class="logo">Brain Mentor</label>
+                <ul>
+                    <li><a class="active" href="home">Home</a></li>
+                    <li><a href="detection">Detection</a></li>
+                    <li><a href="doctors">Doctors</a></li>
+                    <li><a href="patient_treat">Treatments</a></li>
+                    <li><a href="blog">Blogs</a></li>
+                    <li><a href="appointment" class="btn-appointment">Appointment</a></li>
+                    <li><a href="logout">Logout</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <!-- Home Content -->
+        <main>
+            <div class="chatbot">
+
+                <a href="#" id="signup-patient"> <img
+                        src="/static/images/chatbot.png" alt="chatbot"></a>
+            </div>
+            <div class="chatbot-popup">
+                <div class="popup-content">
+                    <div class="signup">
+                        <div class="chat">
+
+                            <!-- ChatBot -->
+                            <section class="msger">
+                                <header class="msger-header">
+                                    <div class="msger-header-title">
+                                        <i class="fas fa-bug"></i> Chatbot <i
+                                            class="fas fa-bug"></i>
+                                        <img src="/static/images/close.png"
+                                            alt="close"
+                                            class="close">
+                                    </div>
+                                </header>
+
+                                <main class="msger-chat">
+                                    <div class="msg left-msg">
+
+                                        <div class="msg-bubble">
+                                            <div class="msg-info">
+                                                <div class="msg-info-name">Chatbot</div>
+                                                <div class="msg-info-time">12:45</div>
+                                            </div>
+
+                                            <div class="msg-text">
+                                                Hi, welcome to ChatBot!
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </main>
+
+                                <form class="msger-inputarea">
+                                    <input type="text" class="msger-input"
+                                        id="textInput"
+                                        placeholder="Enter your message...">
+                                    <button type="submit" class="msger-send-btn">Send</button>
+                                </form>
+                            </section>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <section class="main">
+
+                <div class="image-overlay">
+                    <div class="home-text">
+
+                        <h1><span>BrainMentor</span></h1>
+                        <p>
+                            Lorem ipsum dolor sit amet consectetur
+                            <br> adipisicing elit. Praesentium corporis quo.
+                        </p>
+                        <a href="appointment" class="btn">Consult</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- About Us -->
+
+            <section class="section_doctors">
+                <div class="info-doctors">
+                    <h3>About Brain Tumor</h3>
+                    <div class="line_doctors"></div>
+                    <div class="D_paragraph_wraper">
+                        <p>Lorem ipsum dolor sit amet, consectetur
+                            adipiscing
+                            elit.
+                            Fusce vitae risus nec dui venenatis
+                            dignissim.
+                            Aenean
+                            vitae metus in augue pretium ultrices.</p>
+                    </div>
+                    <div class="columns">
+                        <div class="column">
+                            <i class="fa fa-calendar"></i>
+                            <div class="info-div">
+                                <h3>Book an Appointment</h3>
+                                <p>Lorem ipsum dolor sit amet
+                                    consectetur adipisicing elit.
+                                    Natus ullam debitis tempore eveniet sunt</p>
+                            </div>
+                        </div>
+
+                        <div class="column">
+                            <i class="fa fa-stethoscope"></i>
+                            <div class="info-div">
+                                <h3>Consult with a Doctor</h3>
+                                <p>Lorem ipsum dolor sit amet
+                                    consectetur adipisicing elit.
+                                    Natus ullam debitis tempore eveniet sunt</p>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <i class="fa fa-user-md"></i>
+                            <div class="info-div">
+                                <h3>Make a family Doctor</h3>
+                                <p>Lorem ipsum dolor sit amet
+                                    consectetur adipisicing elit.
+                                    Natus ullam debitis tempore eveniet sunt</p>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </section>
+
+
+                <!-- Blogs -->
+
+            <section class="section_doctors">
+                <div class="info-doctors">
+                    <h3>Blogs</h3>
+                    <div class="line_doctors"></div>
+                        <div class="row mb-2">
+                            {% for blog in blogs %}
+                            <div class="col-md-4 mb-4">
+                                <div class="row g-0 border rounded overflow-hidden flex-md-row shadow-sm h-md-250 position-relative">
+                                    <div class="col p-4 d-flex flex-column position-static">
+                                        <strong class="d-inline-block mb-2 text-primary">{{ blog.blog_type }}</strong>
+                                        <h3 class="mb-0">{{ blog.tit_name }}</h3>
+                                        <div class="mb-1 text-muted">{{ blog.pub_date.year }}</div>
+                                        <p class="card-text mb-auto" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">{{ blog.content }}</p>
+                                        <i><p class="card-text mb-auto" style="color: grey;">{{ blog.author }}</p></i>
+                                        <a href="/blogs_deatil/{{blog.blog_id}}" class="stretched-link btn btn-primary">Continue reading</a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if loop.index % 3 == 0 %}
+                                </div><div class="row mb-2">
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                </div> 
+                            
+                            
+                </section>
+               
+                    
+              
+                    <!-- Footer -->
+                    <footer class="footer">
+                        <div class="container">
+                            <div class="row">
+                                <div class="footer-col">
+                                    <h2>Location</h2>
+                                    <span><h5>Address:</h5>
+                                        Pakistan Kamra Rd,<br>
+                                        Attock City, 43600<br></span>
+                                    <span><h5>Phone:</h5>(750) 435-6352</span>
+                                    <span><h5>Fax:</h5>(750) 435-6352</span>
+                                </div>
+                                <div class="footer-col">
+                                    <h2>Blog</h2>
+                                    <ul>
+                                        <li><a href="#">Right Sidebar</a></li>
+                                        <li><a href="#">Left Sidebar</a></li>
+                                        <li><a href="#">Full Width </a></li>
+                                        <li><a href="#">Blog Grid </a></li>
+                                        <li><a href="#">Blog Details </a></li>
+                                    </ul>
+                                </div>
+                                <div class="footer-col">
+                                    <h2>Appointment</h2>
+                                    <p>Lorem ipsum dolor, sit amet consectetur<br>
+                                        adipisicing elit. nemo obcaecati.</p>
+                                    <div class="social-links">
+                                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                                        <a href="#"><i class="fab fa-twitter"></i></a>
+                                        <a href="#"><i
+                                                class="fab fa-linkedin-in"></i></a>
+                                        <a href="#"><i
+                                                class="fab fa-google-plus"></i></a>
+                                        <a href="#"><i class="fab fa-youtube"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr>
+                            <div class="copyright">
+                                <span>© 2023 BrainMentor. All rights reserved.</span>
+                            </div>
+                        </div>
+                    </footer>
+                </main>
+
+                <!-- Chatbot Script -->
+                <script
+                    src='https://use.fontawesome.com/releases/v5.0.13/js/all.js'></script>
+                <script>
+
+    const msgerForm = get(".msger-inputarea");
+    const msgerInput = get(".msger-input");
+    const msgerChat = get(".msger-chat");
+
+
+    // Icons made by Freepik from www.flaticon.com
+    const BOT_IMG = "https://image.flaticon.com/icons/svg/327/327779.svg";
+    const PERSON_IMG = "https://image.flaticon.com/icons/svg/145/145867.svg";
+    const BOT_NAME = "    ChatBot";
+    const PERSON_NAME = "You";
+
+    msgerForm.addEventListener("submit", event => {
+      event.preventDefault();
+
+      const msgText = msgerInput.value;
+      if (!msgText) return;
+
+      appendMessage(PERSON_NAME, PERSON_IMG, "right", msgText);
+      msgerInput.value = "";
+      botResponse(msgText);
+    });
+
+    function appendMessage(name, img, side, text) {
+      //   Simple solution for small apps
+      const msgHTML = `
+<div class="msg ${side}-msg">
+  <div class="msg-img" style="background-image: url(${img})"></div>
+
+  <div class="msg-bubble">
+    <div class="msg-info">
+      <div class="msg-info-name">${name}</div>
+      <div class="msg-info-time">${formatDate(new Date())}</div>
+    </div>
+
+    <div class="msg-text">${text}</div>
+  </div>
+</div>
+`;
+
+      msgerChat.insertAdjacentHTML("beforeend", msgHTML);
+      msgerChat.scrollTop += 500;
+    }
+
+    function botResponse(rawText) {
+
+      // Bot Response
+      $.get("/get", { msg: rawText }).done(function (data) {
+        console.log(rawText);
+        console.log(data);
+        const msgText = data;
+        appendMessage(BOT_NAME, BOT_IMG, "left", msgText);
+
+      });
+
+    }
+
+
+    // Utils
+    function get(selector, root = document) {
+      return root.querySelector(selector);
+    }
+
+    function formatDate(date) {
+      const h = "0" + date.getHours();
+      const m = "0" + date.getMinutes();
+
+      return `${h.slice(-2)}:${m.slice(-2)}`;
+    }
+
+
+
+  </script>
+
+                <!-- ////////////////////////////////////////////////////// -->
+                <script>
+                document.getElementById("signup-patient").addEventListener("click", function(){
+                    document.querySelector(".chatbot-popup").style.display="flex";
+                })
+                     document.querySelector(".close").addEventListener("click",function(){
+                        document.querySelector(".chatbot-popup").style.display="none";
+                     })
+                  </script>
+                <script
+                    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+                    integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+                    crossorigin="anonymous"></script>
+
+            </body>
+
+        </html>
