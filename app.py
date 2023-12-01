@@ -14,7 +14,6 @@ import nltk
 nltk.download('popular')
 lemmatizer = WordNetLemmatizer()
 
-
 model = load_model('model.h5')
 intents = json.loads(open('data.json').read())
 words = pickle.load(open('texts.pkl', 'rb'))
@@ -116,9 +115,61 @@ def Patient_Signup():
     return render_template('Patient_Signup.html')
 
 
+#Brain Tumor Model Prediction
+from flask import Flask, render_template, request
+import tensorflow as tf
+from PIL import Image
+import numpy as np
+from flask import Flask, render_template, request, url_for
+
+# Load the pre-trained model
+model_path = 'Brain Tumor Detection\RealCNN.h5'
+model = tf.keras.models.load_model(model_path)
+
+# Define class labels
+class_labels = ['glioma', 'meningioma', 'notumor', 'pituitary']
+
+# Function to preprocess the image
+def preprocess_image(image_path):
+    img = Image.open(image_path)
+    img = img.resize((224, 224))
+    img_array = tf.keras.preprocessing.image.img_to_array(img)
+    img_array = tf.expand_dims(img_array, 0)
+    return img_array
+
+def predict_image(image_path):
+    img_array = preprocess_image(image_path)
+    predictions = model.predict(img_array)
+    predicted_class = class_labels[np.argmax(predictions)]
+    confidence = np.max(predictions)
+    return predicted_class, confidence
 @app.route('/detection')
 def Detection():
     return render_template('Detection.html')
+
+# Prediction
+@app.route('/predict', methods=['POST'])
+def predict():
+    if 'file' not in request.files:
+        return render_template('Detection.html', message='No file part')
+
+    file = request.files['file']
+
+    if file.filename == '':
+        return render_template('Detection.html', message='No selected file')
+
+    try:
+        image_path = f'static/tmp/{file.filename}'
+        file.save(image_path)
+        predicted_class, confidence = predict_image(image_path)
+
+        # Use url_for to get the correct URL for the image
+        uploaded_image = url_for('static', filename=f'tmp/{file.filename}')
+
+        return render_template('Detection.html', prediction=predicted_class, confidence=confidence, uploaded_image=uploaded_image)
+
+    except Exception as e:
+        return render_template('Detection.html', message=f'Error: {str(e)}')
 
 
 @app.route('/doctors')
@@ -257,16 +308,7 @@ def Doctors_Markers():
     ).add_to(map)
 
 
-
-
     return map._repr_html_()
-
-
-
-
-
-
-
 
 
 # Blog Post
@@ -380,6 +422,7 @@ def chatbot_response(msg):
 def get_bot_response():
     userText = request.args.get('msg')
     return chatbot_response(userText)
+
 
 
 if __name__ == '__main__':
