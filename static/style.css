@@ -5,7 +5,7 @@
     box-sizing: border-box;
 }
 
-/* Header Menu */
+/* Header Menu Content */
 nav {
     height: 72px;
     line-height: 75px;
@@ -122,35 +122,7 @@ ul li a:hover {
     }
 }
 
-/* Main Content */
-
-/* chatbot design */
-.chatbot{   
-    position: fixed;
-    top: 86%;
-    left: 92%;
-}
-.chatbot img{
-    width: 57px;
-    height: 57px;
-    border-radius: 50px;
-    cursor: pointer;
-}
-.chatbot-popup {
-    display: flex;
-    position: absolute;
-    top: 10px;
-    left: 385px;
-    display: none;
-}
-
-.chat {
-    height: 500px;
-    width: 370px;
-    min-width: 300px;
-    max-width: 370px;
-}
-
+/* Home Content */
 
 .main {
     width: 100%;
@@ -314,7 +286,7 @@ ul li a:hover {
         flex-basis: 100%;
     }
 }
-
+/* //////////////////////////////////////////////////////////////////////////////////////////////// */
 /*  Meet Our Doctors */
 .section_doctors {
     display: flex;

@@ -4,21 +4,11 @@ from flask import Flask, render_template, request, redirect, flash
 from flask_login import LoginManager, login_user, UserMixin, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
-import random
-import json
-from keras.models import load_model
 import numpy as np
-import pickle
-from nltk.stem import WordNetLemmatizer
-import nltk
-nltk.download('popular')
-lemmatizer = WordNetLemmatizer()
-
-model = load_model('model.h5')
-intents = json.loads(open('data.json').read())
-words = pickle.load(open('texts.pkl', 'rb'))
-classes = pickle.load(open('labels.pkl', 'rb'))
-
+from flask import Flask, render_template, request, jsonify
+from openai import ChatCompletion
+import random
+import openai
 
 app = Flask(__name__)
 
@@ -29,6 +19,133 @@ app.config['SECRET_KEY'] = 'a0455de1e15d46ad995c0d40928916ef'
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'index'
+
+# Set your OpenAI GPT-3 API key here
+openai.api_key = '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'
+
+# Chatbot Code
+# Provided intents data
+intents_data = {"intents": [
+    {"tag": "greeting",
+     "patterns": ["Hi there", "How are you", "Is anyone there?", "Hey", "Hola", "Hello", "Good day"],
+     "responses": ["Hello, thanks for asking", "Good to see you again", "Hi there, how can I help?"],
+     "context": [""]},
+    {"tag": "goodbye",
+     "patterns": ["Bye", "See you later", "Goodbye", "Nice chatting to you, bye", "Till next time"],
+     "responses": ["See you!", "Have a nice day", "Bye! Come back again soon."],
+     "context": [""]
+    },
+    {"tag": "thanks",
+     "patterns": ["Thanks", "Thank you", "That's helpful", "Awesome, thanks", "Thanks for helping me"],
+     "responses": ["Happy to help!", "Any time!", "My pleasure"],
+     "context": [""]
+    },
+    {"tag": "noanswer",
+     "patterns": [],
+     "responses": ["Sorry, can't understand you", "Please give me more info", "Not sure I understand"],
+     "context": [""]
+    },
+    {"tag": "options",
+     "patterns": ["How you could help me?"],
+     "responses": ["Hello! I'm here to assist you with information related to brain tumors, treatments and medical professionals"],
+     "context": [""]
+    },
+    {"tag": "options",
+     "patterns": ["What are the common symptoms of a brain tumor?"],
+     "responses": ["Common symptoms include headaches, seizures, changes in vision, and cognitive issues."],
+     "context": [""]
+    },
+    {"tag": "options",
+     "patterns": ["Can you explain the different types of brain tumors?"],
+     "responses": ["Brain tumors can be primary & They are classified by location and cell type."],
+     "context": [""]
+    },
+    {"tag": "options",
+     "patterns": ["What are the available treatment options for brain tumors?"],
+     "responses": ["Treatment may include surgery, radiation therapy, chemotherapy, and targeted therapy."],
+     "context": [""]
+    },
+    {"tag": "doctors",
+     "patterns": [" How can I find a neurosurgeon near me?", "Can you provide any motivational resources related to tumor?"],
+     "responses": ["You can find a neurosurgeon on doctor section",
+                    "Sure! you can check our Blog section to read blogs and posts"],
+     "context": ["doctors"]
+    },
+    {"tag": "tumors",
+     "patterns": ["What are the four stages of brain tumor?"],
+     "responses": ["Stage I: Low Grade (Benign) Stage II: Low to Intermediate Grade Stage III: High Grade (Malignant) Stage IV: High Grade (Malignant)"],
+     "context": ["tumors"]
+    },
+    {"tag": "tumors",
+     "patterns": ["Can you explain the difference between benign and malignant brain tumors?"],
+     "responses": ["Benign tumors are non-cancerous and usually less aggressive, while malignant tumors are cancerous and can spread."],
+     "context": ["tumors"]
+    },
+    {"tag": "tumors",
+     "patterns": ["What should I do if I suspect a brain tumor?"],
+     "responses": ["Seek medical attention immediately. Early detection is crucial for treatment."],
+     "context": ["tumors"]
+    },
+    {"tag": "appointment",
+     "patterns": ["What information do I need to provide when booking a medical appointment?"],
+     "responses": [" Typically, you'll need your personal information, insurance details, and a description of your medical concern."],
+     "context": ["appointment"]
+    },
+    {"tag": "appointment",
+     "patterns": ["Can I request a specific date and time for my appointment?"],
+     "responses": ["Yes, you can request a preferred date and time, and we'll check for availability."],
+     "context": ["appointment"]
+    },
+    {"tag": "appointment",
+     "patterns": ["Can I have a video consultation with a brain tumor specialist?"],
+     "responses": ["Yes, we can help you schedule a video consultation with a qualified specialist."],
+     "context": ["appointment"]
+    }
+    # ... other intents
+]}
+
+# Function to handle known intents
+def handle_known_intent(intent, patterns):
+    return random.choice(intent["responses"])
+
+# Function to generate a response using ChatGPT
+def generate_response_with_chatgpt(messages):
+    # Make the ChatGPT API call
+    response = ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=messages,
+    )
+
+    # Extract and return the content of the model-generated response
+    return response['choices'][0]['message']['content'].strip()
+
+# Main function to handle user queries
+def chatbot(user_query):
+    user_query = user_query.lower()
+
+    # Check if the user's query matches predefined patterns
+    for intent_data in intents_data["intents"]:
+        for pattern in intent_data["patterns"]:
+            if pattern.lower() in user_query:
+                return handle_known_intent(intent_data, intent_data["patterns"])
+
+    # If no match found, generate a response using ChatGPT
+    # Creating a list of messages for ChatGPT, including the user's query
+    messages = [{'role': 'system', 'content': 'You are a helpful assistant.'}]
+
+    if user_query:
+        messages.append({'role': 'user', 'content': user_query})
+
+    # Call the new function to generate a response using ChatGPT
+    return generate_response_with_chatgpt(messages)
+
+
+@app.route('/get_response', methods=['POST'])
+def get_response():
+    user_query = request.form['user_query']
+    response = chatbot(user_query)
+    return jsonify({'response': response})
+
 
 
 # Create a Model of User
@@ -360,70 +477,6 @@ def edit_post(id):
         flash('Your Post Has Been Sucessfully Edit', 'success')
         return redirect('/home')
     return render_template('Edit_post.html', blog=blog)
-
-
-def clean_up_sentence(sentence):
-    # tokenize the pattern - split words into array
-    sentence_words = nltk.word_tokenize(sentence)
-    # stem each word - create short form for word
-    sentence_words = [lemmatizer.lemmatize(
-        word.lower()) for word in sentence_words]
-    return sentence_words
-
-# return bag of words array: 0 or 1 for each word in the bag that exists in the sentence
-
-
-def bow(sentence, words, show_details=True):
-    # tokenize the pattern
-    sentence_words = clean_up_sentence(sentence)
-    # bag of words - matrix of N words, vocabulary matrix
-    bag = [0]*len(words)
-    for s in sentence_words:
-        for i, w in enumerate(words):
-            if w == s:
-                # assign 1 if current word is in the vocabulary position
-                bag[i] = 1
-                if show_details:
-                    print("found in bag: %s" % w)
-    return (np.array(bag))
-
-
-def predict_class(sentence, model):
-    # filter out predictions below a threshold
-    p = bow(sentence, words, show_details=False)
-    res = model.predict(np.array([p]))[0]
-    ERROR_THRESHOLD = 0.25
-    results = [[i, r] for i, r in enumerate(res) if r > ERROR_THRESHOLD]
-    # sort by strength of probability
-    results.sort(key=lambda x: x[1], reverse=True)
-    return_list = []
-    for r in results:
-        return_list.append({"intent": classes[r[0]], "probability": str(r[1])})
-    return return_list
-
-
-def getResponse(ints, intents_json):
-    tag = ints[0]['intent']
-    list_of_intents = intents_json['intents']
-    for i in list_of_intents:
-        if (i['tag'] == tag):
-            result = random.choice(i['responses'])
-            break
-    return result
-
-
-def chatbot_response(msg):
-    ints = predict_class(msg, model)
-    res = getResponse(ints, intents)
-    return res
-
-
-@app.route("/get")
-def get_bot_response():
-    userText = request.args.get('msg')
-    return chatbot_response(userText)
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)
