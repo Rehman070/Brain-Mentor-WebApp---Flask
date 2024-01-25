@@ -172,9 +172,9 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
-app.config['MAIL_USERNAME'] = 'abdurrehman5732@gmail.com'
-app.config['MAIL_PASSWORD'] = 'hryw fkka ihqy vecz'  # Use App Password if 2-Step Verification is enabled
-app.config['MAIL_DEFAULT_SENDER'] = 'abdurrehman5732@gmail.com'
+app.config['MAIL_USERNAME'] = 'noreplay'
+app.config['MAIL_PASSWORD'] = '12345'  # Use App Password if 2-Step Verification is enabled
+app.config['MAIL_DEFAULT_SENDER'] = 'noreplay'
 
 mail = Mail(app)
 
