@@ -39,6 +39,8 @@
     </head>
 
     <body>
+         {% if session %}
+       
         <!-- Account Creation Message -->
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -319,6 +321,294 @@ Chat icon to toggle the chatbot -->
                     integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
                     crossorigin="anonymous"></script>
 
+                   
+   
+    
+                    {% else %}
+                        
+        <!-- Account Creation Message -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{category}} alert-dismissible fade show"
+                role="alert">
+                <strong>Message:</strong>{{message}}
+            </div>
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    setTimeout(function() {
+                        let alert = document.querySelector(".alert-{{category}}");
+                        if (alert) {
+                            alert.style.display = "none";
+                        }
+                    }, 2200); // 2200 milliseconds = 1 second
+                });
+            </script>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+
+        
+        <!-- This is Nav Bar -->
+        <header>
+            <nav>
+                <input type="checkbox" id="check">
+                <label for="check" class="checkbtn">
+                    <i class="fas fa-bars"></i>
+                </label>
+                <label class="logo">Brain Mentor</label>
+                <ul>
+                    <li><a class="active" href="home">Home</a></li>
+                    <li><a href="detection">Detection</a></li>
+                    <li><a href="doctors">Doctors</a></li>
+                    <li><a href="patient_treat">Treatments</a></li>
+                    <li><a href="blog">Blogs</a></li>
+                    <li><a href="appointment" class="btn-appointment">Appointment</a></li>
+                    <li><a href="logout">Logout</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <!-- Home Content -->
+        <main>
+            <section class="main">
+
+                <div class="image-overlay">
+                    <div class="home-text">
+
+                        <h1><span>BrainMentor</span></h1>
+                        <p>
+                            Lorem ipsum dolor sit amet consectetur
+                            <br> adipisicing elit. Praesentium corporis quo.
+                        </p>
+                        <a href="appointment" class="btn">Consult</a>
+
+<!-- Chatbot
+Chat icon to toggle the chatbot -->
+<div class="chat-icon" onclick="toggleChatbot()">
+    <i class="fa fa-comments"></i>
+</div>
+
+<div class="wrapper" id="chatbot-container">
+    <div class="title">Chatbot</div>
+    <div class="box" id="chatbox"> <!-- Added an ID to the chatbox for easy access -->
+        <div class="item">
+            <div class="icon">
+              
+            </div>
+            <div class="msg">
+                <p>Hello everyone, How are you?</p>
+            </div>
+        </div>
+        <br clear="both">
+    </div>
+
+    <div class="typing-area">
+        <div class="input-field">
+            <input type="text" id="user-input" placeholder="Type your message" required>
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+    // Function to toggle the visibility of the chatbot
+    function toggleChatbot() {
+        var chatbotContainer = $('#chatbot-container');
+        chatbotContainer.toggle();
+        scrollToBottom();
+    }
+
+    // Function to send a message when the send button is clicked or Enter key is pressed
+    function sendMessage() {
+        var userQuery = $('#user-input').val();
+        if (userQuery.trim() !== '') {
+            appendUserMessage(userQuery);
+
+            $.ajax({
+                type: 'POST',
+                url: '/get_response',
+                data: { user_query: userQuery },
+                success: function (response) {
+                    appendChatbotMessage(response.response);
+                    scrollToBottom();
+                }
+            });
+
+            $('#user-input').val('');
+        }
+    }
+
+    // Function to append user's message to the chat display
+    function appendUserMessage(message) {
+        $('.box').append('<div class="item right"><div class="msg"><p>' + message + '</p></div><div class="icon user-icon"></div></div><br clear="both">');
+    }
+
+    // Function to append chatbot's message to the chat display
+    function appendChatbotMessage(message) {
+        $('.box').append('<div class="item"><div class="icon"></div><div class="msg"><p>' + message + '</p></div></div><br clear="both">');
+    }
+
+    // Function to scroll to the bottom of the chatbox with a smooth scroll effect
+    function scrollToBottom() {
+        var chatbox = document.getElementById("chatbox");
+        // Smooth scroll effect
+        $('#' + chatbox.id).animate({ scrollTop: chatbox.scrollHeight }, 800);
+    }
+
+    // Listen for the Enter key press on the input field
+    $('#user-input').keypress(function (e) {
+        if (e.which === 13) { // 13 is the key code for Enter
+            sendMessage();
+        }
+    });
+</script>
+
+
+
+                    </div>
+                </div>
+            </section>
+
+    
+            <!-- About Us -->
+
+            <section class="section_doctors">
+                <div class="info-doctors">
+                    <h3>About Brain Tumor</h3>
+                    <div class="line_doctors"></div>
+                    <div class="D_paragraph_wraper">
+                        <p>Lorem ipsum dolor sit amet, consectetur
+                            adipiscing
+                            elit.
+                            Fusce vitae risus nec dui venenatis
+                            dignissim.
+                            Aenean
+                            vitae metus in augue pretium ultrices.</p>
+                    </div>
+                    <div class="columns">
+                        <div class="column">
+                            <i class="fa fa-calendar"></i>
+                            <div class="info-div">
+                                <h3>Book an Appointment</h3>
+                                <p>Lorem ipsum dolor sit amet
+                                    consectetur adipisicing elit.
+                                    Natus ullam debitis tempore eveniet sunt</p>
+                            </div>
+                        </div>
+
+                        <div class="column">
+                            <i class="fa fa-stethoscope"></i>
+                            <div class="info-div">
+                                <h3>Consult with a Doctor</h3>
+                                <p>Lorem ipsum dolor sit amet
+                                    consectetur adipisicing elit.
+                                    Natus ullam debitis tempore eveniet sunt</p>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <i class="fa fa-user-md"></i>
+                            <div class="info-div">
+                                <h3>Make a family Doctor</h3>
+                                <p>Lorem ipsum dolor sit amet
+                                    consectetur adipisicing elit.
+                                    Natus ullam debitis tempore eveniet sunt</p>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </section>
+
+
+                <!-- Blogs -->
+
+            <section class="section_doctors">
+                <div class="info-doctors">
+                    <h3>Blogs</h3>
+                    <div class="line_doctors"></div>
+                        <div class="row mb-2">
+                            {% for blog in blogs %}
+                            <div class="col-md-4 mb-4">
+                                <div class="row g-0 border rounded overflow-hidden flex-md-row shadow-sm h-md-250 position-relative">
+                                    <div class="col p-4 d-flex flex-column position-static">
+                                        <strong class="d-inline-block mb-2 text-primary">{{ blog.blog_type }}</strong>
+                                        <h3 class="mb-0">{{ blog.tit_name }}</h3>
+                                        <div class="mb-1 text-muted">{{ blog.pub_date.year }}</div>
+                                        <p class="card-text mb-auto" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">{{ blog.content }}</p>
+                                        <i><p class="card-text mb-auto" style="color: grey;">{{ blog.author }}</p></i>
+                                        <a href="/blogs_deatil/{{blog.blog_id}}" class="stretched-link btn btn-primary">Continue reading</a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if loop.index % 3 == 0 %}
+                                </div><div class="row mb-2">
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                </div> 
+                            
+                            
+                </section>
+               
+                    
+              
+                    <!-- Footer -->
+                    <footer class="footer">
+                        <div class="container">
+                            <div class="row">
+                                <div class="footer-col">
+                                    <h2>Location</h2>
+                                    <span><h5>Address:</h5>
+                                        Pakistan Kamra Rd,<br>
+                                        Attock City, 43600<br></span>
+                                    <span><h5>Phone:</h5>(750) 435-6352</span>
+                                    <span><h5>Fax:</h5>(750) 435-6352</span>
+                                </div>
+                                <div class="footer-col">
+                                    <h2>Blog</h2>
+                                    <ul>
+                                        <li><a href="#">Right Sidebar</a></li>
+                                        <li><a href="#">Left Sidebar</a></li>
+                                        <li><a href="#">Full Width </a></li>
+                                        <li><a href="#">Blog Grid </a></li>
+                                        <li><a href="#">Blog Details </a></li>
+                                    </ul>
+                                </div>
+                                <div class="footer-col">
+                                    <h2>Appointment</h2>
+                                    <p>Lorem ipsum dolor, sit amet consectetur<br>
+                                        adipisicing elit. nemo obcaecati.</p>
+                                    <div class="social-links">
+                                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                                        <a href="#"><i class="fab fa-twitter"></i></a>
+                                        <a href="#"><i
+                                                class="fab fa-linkedin-in"></i></a>
+                                        <a href="#"><i
+                                                class="fab fa-google-plus"></i></a>
+                                        <a href="#"><i class="fab fa-youtube"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr>
+                            <div class="copyright">
+                                <span>© 2023 BrainMentor. All rights reserved.</span>
+                            </div>
+                        </div>
+                    </footer>
+                </main>
+
+                <script
+                    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+                    integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+                    crossorigin="anonymous"></script>
+                    {% endif %}
+                  
+
+   
             </body>
 
         </html>

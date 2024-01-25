@@ -1,14 +1,19 @@
 import datetime
-import folium
-from flask import Flask, render_template, request, redirect, flash
-from flask_login import LoginManager, login_user, UserMixin, logout_user
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask_sqlalchemy import SQLAlchemy
-import numpy as np
-from flask import Flask, render_template, request, jsonify
-from openai import ChatCompletion
 import random
+from flask import Flask, render_template, request, jsonify, redirect, flash, url_for,abort, session
+from flask_login import LoginManager, login_user, UserMixin, logout_user
+from flask_sqlalchemy import SQLAlchemy
+from openai import ChatCompletion
+import folium
+from werkzeug.security import generate_password_hash, check_password_hash
+import numpy as np
+import tensorflow as tf
+from PIL import Image
 import openai
+from authlib.integrations.flask_client import OAuth
+from flask_mail import Mail, Message
+import json
+import requests
 
 app = Flask(__name__)
 
@@ -21,87 +26,15 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'index'
 
 # Set your OpenAI GPT-3 API key here
-openai.api_key = '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'
+openai.api_key = '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'
 
-# Chatbot Code
 # Provided intents data
 intents_data = {"intents": [
     {"tag": "greeting",
      "patterns": ["Hi there", "How are you", "Is anyone there?", "Hey", "Hola", "Hello", "Good day"],
      "responses": ["Hello, thanks for asking", "Good to see you again", "Hi there, how can I help?"],
      "context": [""]},
-    {"tag": "goodbye",
-     "patterns": ["Bye", "See you later", "Goodbye", "Nice chatting to you, bye", "Till next time"],
-     "responses": ["See you!", "Have a nice day", "Bye! Come back again soon."],
-     "context": [""]
-    },
-    {"tag": "thanks",
-     "patterns": ["Thanks", "Thank you", "That's helpful", "Awesome, thanks", "Thanks for helping me"],
-     "responses": ["Happy to help!", "Any time!", "My pleasure"],
-     "context": [""]
-    },
-    {"tag": "noanswer",
-     "patterns": [],
-     "responses": ["Sorry, can't understand you", "Please give me more info", "Not sure I understand"],
-     "context": [""]
-    },
-    {"tag": "options",
-     "patterns": ["How you could help me?"],
-     "responses": ["Hello! I'm here to assist you with information related to brain tumors, treatments and medical professionals"],
-     "context": [""]
-    },
-    {"tag": "options",
-     "patterns": ["What are the common symptoms of a brain tumor?"],
-     "responses": ["Common symptoms include headaches, seizures, changes in vision, and cognitive issues."],
-     "context": [""]
-    },
-    {"tag": "options",
-     "patterns": ["Can you explain the different types of brain tumors?"],
-     "responses": ["Brain tumors can be primary & They are classified by location and cell type."],
-     "context": [""]
-    },
-    {"tag": "options",
-     "patterns": ["What are the available treatment options for brain tumors?"],
-     "responses": ["Treatment may include surgery, radiation therapy, chemotherapy, and targeted therapy."],
-     "context": [""]
-    },
-    {"tag": "doctors",
-     "patterns": [" How can I find a neurosurgeon near me?", "Can you provide any motivational resources related to tumor?"],
-     "responses": ["You can find a neurosurgeon on doctor section",
-                    "Sure! you can check our Blog section to read blogs and posts"],
-     "context": ["doctors"]
-    },
-    {"tag": "tumors",
-     "patterns": ["What are the four stages of brain tumor?"],
-     "responses": ["Stage I: Low Grade (Benign) Stage II: Low to Intermediate Grade Stage III: High Grade (Malignant) Stage IV: High Grade (Malignant)"],
-     "context": ["tumors"]
-    },
-    {"tag": "tumors",
-     "patterns": ["Can you explain the difference between benign and malignant brain tumors?"],
-     "responses": ["Benign tumors are non-cancerous and usually less aggressive, while malignant tumors are cancerous and can spread."],
-     "context": ["tumors"]
-    },
-    {"tag": "tumors",
-     "patterns": ["What should I do if I suspect a brain tumor?"],
-     "responses": ["Seek medical attention immediately. Early detection is crucial for treatment."],
-     "context": ["tumors"]
-    },
-    {"tag": "appointment",
-     "patterns": ["What information do I need to provide when booking a medical appointment?"],
-     "responses": [" Typically, you'll need your personal information, insurance details, and a description of your medical concern."],
-     "context": ["appointment"]
-    },
-    {"tag": "appointment",
-     "patterns": ["Can I request a specific date and time for my appointment?"],
-     "responses": ["Yes, you can request a preferred date and time, and we'll check for availability."],
-     "context": ["appointment"]
-    },
-    {"tag": "appointment",
-     "patterns": ["Can I have a video consultation with a brain tumor specialist?"],
-     "responses": ["Yes, we can help you schedule a video consultation with a qualified specialist."],
-     "context": ["appointment"]
-    }
-    # ... other intents
+    # ... (other intent data)
 ]}
 
 # Function to handle known intents
@@ -130,15 +63,12 @@ def chatbot(user_query):
                 return handle_known_intent(intent_data, intent_data["patterns"])
 
     # If no match found, generate a response using ChatGPT
-    # Creating a list of messages for ChatGPT, including the user's query
     messages = [{'role': 'system', 'content': 'You are a helpful assistant.'}]
 
     if user_query:
         messages.append({'role': 'user', 'content': user_query})
 
-    # Call the new function to generate a response using ChatGPT
     return generate_response_with_chatgpt(messages)
-
 
 @app.route('/get_response', methods=['POST'])
 def get_response():
@@ -146,7 +76,7 @@ def get_response():
     response = chatbot(user_query)
     return jsonify({'response': response})
 
-
+# ... (remaining code, User Model, Blogs Model, routes, etc.)
 
 # Create a Model of User
 class Patients(UserMixin, db.Model):
@@ -218,13 +148,89 @@ def index():
 @app.route('/logout')
 def logout():
     logout_user()
+    session.pop("user", None)
     return redirect('/')
 
-
+#SigninWithGoogle
 @app.route('/home')
 def Home():
     blogss = Blogs.query.all()
-    return render_template('Home.html', blogs=blogss)
+    return render_template('Home.html', blogs=blogss, session=session.get("user"), pretty=json.dumps(session.get("user"), indent=4))
+
+appConf = {
+    "OAUTH2_CLIENT_ID": "552872142229-vufan07358j75rr54k9l2u4ibrmpt8dn.apps.googleusercontent.com",
+    "OAUTH2_CLIENT_SECRET": "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",
+    "OAUTH2_META_URL": "https://accounts.google.com/.well-known/openid-configuration",
+    "FLASK_SECRET": "ALongRandomlyGeneratedString",
+    "FLASK_PORT": 5000
+}
+
+app.secret_key = appConf.get("FLASK_SECRET")
+
+# Flask-Mail configuration
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_USERNAME'] = 'abdurrehman5732@gmail.com'
+app.config['MAIL_PASSWORD'] = 'hryw fkka ihqy vecz'  # Use App Password if 2-Step Verification is enabled
+app.config['MAIL_DEFAULT_SENDER'] = 'abdurrehman5732@gmail.com'
+
+mail = Mail(app)
+
+oauth = OAuth(app)
+oauth.register(
+    "myApp",
+    client_id=appConf.get("OAUTH2_CLIENT_ID"),
+    client_secret=appConf.get("OAUTH2_CLIENT_SECRET"),
+    client_kwargs={
+        "scope": "openid profile email https://www.googleapis.com/auth/user.birthday.read https://www.googleapis.com/auth/user.gender.read",
+    },
+    server_metadata_url=f'{appConf.get("OAUTH2_META_URL")}',
+)
+
+@app.route("/signin-google")
+def googleCallback():
+    # fetch access token and id token using authorization code
+    token = oauth.myApp.authorize_access_token()
+
+    # google people API
+    personDataUrl = "https://people.googleapis.com/v1/people/me?personFields=genders,birthdays,emailAddresses"
+    personDataResponse = requests.get(personDataUrl, headers={
+        "Authorization": f"Bearer {token['access_token']}"
+    })
+
+    if personDataResponse.status_code == 200:
+        personData = personDataResponse.json()
+        token["personData"] = personData
+
+        # Send welcome email to the user
+        email = personData.get('emailAddresses', [{}])[0].get('value', None)
+        if email:
+            send_welcome_email(email)
+
+        # set complete user information in the session
+        session["user"] = token
+        flash(' Successfully logged in with Google!', 'success')  # Flash a success message
+        return redirect(url_for("Home"))
+    else:
+        print(f"Error fetching Google People API data: {personDataResponse.text}")
+        abort(500)  # You can handle the error in a more appropriate way
+
+def send_welcome_email(email):
+    msg = Message("BrainMentor: Your Path to Brain Health and Wellness",
+                  recipients=[email])
+    msg.body = "Welcome to BrainMentor! 🧠🌐 Our advanced web app uses Deep Learning and Image Processing to detect brain tumors swiftly. Beyond detection, we offer localization, doctor appointments, and a chatbot for valuable insights. Explore video consultations, physician finders, and more. Your journey to a healthier future starts here!"
+    mail.send(msg)
+
+@app.route("/google-login")
+def googleLogin():
+    if "user" in session:
+        abort(404)
+    return oauth.myApp.authorize_redirect(redirect_uri=url_for("googleCallback", _external=True))
+
+
+#/////////////////////////////////////////////////////////////////////////////
 
 
 @app.route('/patient_signup')
@@ -478,5 +484,6 @@ def edit_post(id):
         return redirect('/home')
     return render_template('Edit_post.html', blog=blog)
 
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True,host='0.0.0.0', port=appConf.get("FLASK_PORT"))

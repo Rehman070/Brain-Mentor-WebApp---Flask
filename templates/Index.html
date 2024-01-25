@@ -97,10 +97,9 @@
                     <div class="signup">
                         <div class="Box">
                             <form action="/" method="post">
-                                <img src="/static/images/back.png" alt="close"
-                                    class="login-back">
+                                <img src="/static/images/back.png" alt="close" class="login-back">
                                 <h3>Login</h3>
-
+            
                                 <div class="inputBox">
                                     <label>User Name</label>
                                     <input type="text" required name="username">
@@ -115,14 +114,21 @@
                                 </div>
                                 <input type="hidden" name="action" value="login"> 
                                 <button type="submit" class="signup-btn">Login</button>
-                                <p class="link-to-login">Don't have an
-                                    account? <a href="#">Signup</a></p>
+                                <p class="link-to-login">Don't have an account? <a href="#">Signup</a></p>
+            
+                                <!-- Google login button added within the form -->
+                                <div style="display: flex; align-items: center; justify-content: center; margin-top: 1rem;">
+                                    <a href="{{ url_for('googleLogin') }}" style="padding: 8px 16px; border: 1px solid #cbd5e0; border-radius: 0.375rem; display: flex; gap: 0.5rem; color: #4a5568; font-weight: 500; text-decoration: none; transition: border-color 0.15s, color 0.15s, box-shadow 0.15s;">
+                                        <img src="https://www.svgrepo.com/show/475656/google-color.svg" style="width: 1.5rem; height: 1.5rem;" alt="google logo">
+                                        <span>Login with Google</span>
+                                    </a>
+                                </div>
                             </form>
                         </div>
-
                     </div>
                 </div>
             </div>
+            
 
             <!-- Doctor Login -->
             <div class="doctor-login-popup">
