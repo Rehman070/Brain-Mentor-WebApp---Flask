@@ -14,6 +14,7 @@ from authlib.integrations.flask_client import OAuth
 from flask_mail import Mail, Message
 import json
 import requests
+from folium.plugins import Geocoder
 
 app = Flask(__name__)
 
@@ -172,9 +173,9 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
-app.config['MAIL_USERNAME'] = 'abdurrehman5732@gmail.com'
+app.config['MAIL_USERNAME'] = 'noreplay'
 app.config['MAIL_PASSWORD'] = 'hryw fkka ihqy vecz'  # Use App Password if 2-Step Verification is enabled
-app.config['MAIL_DEFAULT_SENDER'] = 'abdurrehman5732@gmail.com'
+app.config['MAIL_DEFAULT_SENDER'] = 'noreplay'
 
 mail = Mail(app)
 
@@ -309,9 +310,6 @@ def Appointment():
 def Patient_Treat():
     return render_template('Patient_Treat.html')
 
-
-# Locations
-
 @app.route('/doctors_marker')
 def Doctors_Markers():
     # Coordinates for the center of Islamabad, Pakistan
@@ -320,19 +318,29 @@ def Doctors_Markers():
     # Create a Folium map
     map = folium.Map(
         location=pakistan_isb_coordinates,
-        tiles='OpenStreetMap',
+        tiles=None,
         zoom_start=12,  # Adjust the zoom level as needed
     )
+    
+    # Add tile layers
+    folium.TileLayer('CartodbPositron').add_to(map)
+    folium.TileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', name='CartoDBDarkMatter', attr="CartoDBDarkMatter").add_to(map)
+    folium.TileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', name='OpenTopoMap', attr="OpenTopoMap").add_to(map)
+    folium.TileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', name='Esri', attr="Esri").add_to(map)
+    folium.TileLayer('OpenStreetMap').add_to(map)
+
+    # Add layers control over the map
+    folium.LayerControl().add_to(map)    
+
+    Geocoder().add_to(map)
 
     # Add a marker to the map
     folium.Marker(
         location=pakistan_isb_coordinates,
         popup='Islamabad, Pakistan',
         tooltip='Islamabad, Pakistan',
-        icon=folium.Icon(color='red',icon='location-dot',prefix='fa')
+        icon=folium.Icon(color='red', icon='location-dot', prefix='fa')
     ).add_to(map)
-
- # 1 
 
     # Add a marker to the map
     marker_location = [34.223299962163615, 72.263259854991]
@@ -350,11 +358,9 @@ def Doctors_Markers():
         location=marker_location,
         tooltip='Brain & Spine Clinic',
         popup=folium.Popup(html=marker_popup_content, max_width=300),
-         icon=folium.Icon(color='green',icon='user-doctor',prefix='fa')
+        icon=folium.Icon(color='green', icon='user-doctor', prefix='fa')
     ).add_to(map)
 
-
-# 2
     # Add a marker to the map
     marker_location = [33.71081684674506, 73.02100506625507]
     marker_popup_content = """
@@ -371,10 +377,9 @@ def Doctors_Markers():
         location=marker_location,
         tooltip='Dr. Alamgir Neuro Surgeon',
         popup=folium.Popup(html=marker_popup_content, max_width=300),
-         icon=folium.Icon(color='green',icon='user-doctor',prefix='fa')
+        icon=folium.Icon(color='green', icon='user-doctor', prefix='fa')
     ).add_to(map)
 
-    # 3
     # Add a marker to the map
     marker_location = [33.694266983374575, 72.99629625361848]
     marker_popup_content = """
@@ -391,9 +396,8 @@ def Doctors_Markers():
         location=marker_location,
         tooltip='Dr Akbar Khan',
         popup=folium.Popup(html=marker_popup_content, max_width=300),
-        icon=folium.Icon(color='green',icon='user-doctor',prefix='fa')
+        icon=folium.Icon(color='green', icon='user-doctor', prefix='fa')
     ).add_to(map)
-
 
     # Add a marker to the map
     marker_location = [33.67596469823713, 73.06711812392459]
@@ -411,27 +415,26 @@ def Doctors_Markers():
         location=marker_location,
         tooltip='Prof. Dr Inayat Ullah Khan',
         popup=folium.Popup(html=marker_popup_content, max_width=300),
-        icon=folium.Icon(color='green',icon='user-doctor',prefix='fa')
+        icon=folium.Icon(color='green', icon='user-doctor', prefix='fa')
     ).add_to(map)
-
 
     # Add markers for hotel, hospital, restaurant, and museum
     markers = [
-    {"location": [33.6844, 73.0479], "name": "Hotel ABC", "type": "hotel", "icon": "bed"},
-    {"location": [33.6804, 73.0471], "name": "City Hospital", "type": "hospital", "icon": "hospital"},
-    {"location": [33.6865, 73.0512], "name": "Fine Dining Restaurant", "type": "restaurant", "icon": "cutlery"},
-    {"location": [33.6883, 73.0495], "name": "National Museum", "type": "museum", "icon": "university"},
-]
+        {"location": [33.6844, 73.0479], "name": "Hotel ABC", "type": "hotel", "icon": "bed"},
+        {"location": [33.6804, 73.0471], "name": "City Hospital", "type": "hospital", "icon": "hospital"},
+        {"location": [33.6865, 73.0512], "name": "Fine Dining Restaurant", "type": "restaurant", "icon": "cutlery"},
+        {"location": [33.6883, 73.0495], "name": "National Museum", "type": "museum", "icon": "university"},
+    ]
 
     for marker in markers:
         folium.Marker(
-        location=marker["location"],
-        popup=folium.Popup(html=f"<b>{marker['name']}</b>", max_width=300),
-        icon=folium.Icon(color='blue' if marker["type"] == "hospital" else 'green', icon=marker["icon"], prefix='fa')
-    ).add_to(map)
-
+            location=marker["location"],
+            popup=folium.Popup(html=f"<b>{marker['name']}</b>", max_width=300),
+            icon=folium.Icon(color='blue' if marker["type"] == "hospital" else 'green', icon=marker["icon"], prefix='fa')
+        ).add_to(map)
 
     return map._repr_html_()
+
 
 
 # Blog Post
