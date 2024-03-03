@@ -2,6 +2,51 @@
 <html lang="en">
 
     <head>
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                    background-color: #f4f4f4;
+                }
+
+                main {
+                    padding: 20px;
+                }
+
+                form {
+                    background-color: #fff;
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                    padding: 20px;
+                    max-width: 400px;
+                    margin: auto;
+                }
+
+                label {
+                    display: block;
+                    margin-bottom: 8px;
+                }
+
+                input, select {
+                    width: 100%;
+                    padding: 10px;
+                    margin-bottom: 15px;
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                    box-sizing: border-box;
+                }
+
+
+            </style>
+        </head>
+
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Brain Mentor - Appointment</title>
@@ -27,13 +72,34 @@
             rel="stylesheet"
             integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
             crossorigin="anonymous">
-            
+
         <script src="https://kit.fontawesome.com/b33b219100.js"
             crossorigin="anonymous"></script>
 
     </head>
 
     <body>
+         <!-- Appointment Booking Message -->
+         {% with messages = get_flashed_messages(with_categories=true) %}
+         {% if messages %}
+             {% for category, message in messages %}
+             <div class="alert alert-{{category}} alert-dismissible fade show"
+                 role="alert">
+                 <strong>Message:</strong>{{message}}
+             </div>
+             <script>
+                 document.addEventListener("DOMContentLoaded", function() {
+                     setTimeout(function() {
+                         let alert = document.querySelector(".alert-{{category}}");
+                         if (alert) {
+                             alert.style.display = "none";
+                         }
+                     }, 2200); // 2200 milliseconds = 1 second
+                 });
+             </script>
+             {% endfor %}
+         {% endif %}
+     {% endwith %}
         <!-- This is Nav Bar -->
         <header>
             <nav>
@@ -42,53 +108,67 @@
                     <i class="fas fa-bars"></i>
                 </label>
                 <label class="logo">Brain Mentor</label>
-                <ul>
-                    <li><a class="active" href="home">Home</a></li>
-                    <li><a href="detection">Detection</a></li>
-                    <li><a href="#">Doctors</a></li>
-                    <li><a href="patient_treat">Treatments</a></li>
-                    <li><a href="blog">Blogs</a></li>
-                    <li><a href="appointment" class="btn-appointment">Appointment</a></li>
-                    <li><a href="logout">Logout</a></li>
+                <ul id="menu">
+                    <li><a href="/home">Home</a></li>
+                    <li><a href="/detection">Detection</a></li>
+                    <li><a href="/doctors">Doctors</a></li>
+                    <li><a href="/patient_treat">Treatments</a></li>
+                    <li><a href="/blog">Blogs</a></li>
+                    <li><a href="/logout">Logout</a></li>
                 </ul>
             </nav>
         </header>
 
-        <!-- Appointment -->
-        <section class="app-bg"></section>
-             <div class="appointment-sec">
-                <div class="popup-content">
-                    <div class="appointmentt">
-                        <div class="Box">
-                            <form action>
-                                <h3>Booking Appointment</h3>
+        <body>
 
-                                <div class="inputBox">
-                                    <label>Name *</label>
-                                    <input type="text" required>
-                                </div>
-                                <div class="inputBox">
-                                    <label>Email *</label>
-                                    <input type="text" required>
-                                </div>
-                                <div class="inputBox">
-                                    <label>Phone *</label>
-                                    <input type="tel" required>
-                                </div>
-                                <div class="inputBox">
-                                    <label>Message (optional)</label>
-                                    <textarea name="message" id="textarea" cols="47" rows="3"></textarea>
-                                </div>
-                                <button type="submit" class="submit-btn">Submit</button>
-                              
-                            </form>
-                        </div>
 
-                    </div>
-                </div>
-            </div>
+            <body>
+               
+                    <h1 style="background-color: black;margin-top: 30px; padding: 5px; color: white; text-align: center;">Book Your Appointment</h1>
+                
 
-          
+                <main>
+                    <form action="/make_appointment" method="POST" >
+                        <input type="hidden" name="doctor_id" value="{{ request.args.get('doctor_id') }}">
+
+                        <label for="patientName">Patient Name:</label>
+                    <input type="text" id="name" name="name"  required>
+
+                        <label for="email">Email:</label>
+                    <input type="email" id="email" name="email"  required>
+
+                        <label for="phone">Phone Number:</label>
+                     <input type="text" id="number" name="number"  required>
+
+                        <label for="appointmentDate">Appointment Date:</label>
+                        <input type="date" id="appointmentDate" name="date"  required>
+
+                        <label for="timeSlot">Select Time Slot:</label>
+                        <select id="timeSlot"  name="timeslot" required>
+                            <option value="9am-12pm">9am to 12pm</option>
+                            <option value="1pm-4pm">1pm to 4pm</option>
+                        </select>
+
+                        <label for="consultation">Select consultation type:</label>
+                        <select id="consultation"  name="consultation" required>
+                            <option value="Online Meeting">Online Meeting</option>
+                            <option value="Physical Meeting">Physical Meeting</option>
+                        </select>
+
+                        <button class="submit-btn" type="submit">Submit</button>
+
+
+
+                    </form>
+                </main>
+
+
+            </body>
+            </html>
+
+
+
+
             <!-- Footer -->
             <footer class="footer">
                 <div class="container">
@@ -127,7 +207,7 @@
 
                     <hr>
                     <div class="copyright">
-                        <span>© 2023 BrainMentor. All rights reserved.</span>
+                        <span>©️ 2023 BrainMentor. All rights reserved.</span>
                     </div>
                 </div>
             </footer>
@@ -137,6 +217,33 @@
             src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
             crossorigin="anonymous"></script>
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    var links = document.querySelectorAll("#menu a");
+                    
+                    // Add click event listener to each link
+                    links.forEach(function(link) {
+                        link.addEventListener("click", function(event) {
+                            // Remove "active" class from all links
+                            links.forEach(function(otherLink) {
+                                otherLink.classList.remove("active");
+                            });
+            
+                            // Add "active" class to the clicked link
+                            this.classList.add("active");
+                        });
+                    });
+            
+                    // Set initial active link based on the current URL path
+                    var currentPath = window.location.pathname;
+                    links.forEach(function(link) {
+                        // Check if the current URL contains the link's href value
+                        if (currentPath.indexOf(link.getAttribute("href")) !== -1) {
+                            link.classList.add("active");
+                        }
+                    });
+                });
+            </script>
 
     </body>
 

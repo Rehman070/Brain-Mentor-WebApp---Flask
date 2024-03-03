@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading Bar Example</title>
+    <style>
+        #loading-bar {
+            width: 0;
+            height: 4px;
+            background-color: blue;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 9999;
+            transition: width 3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-bar"></div>
+    <script>
+        // Show loading bar
+        document.addEventListener('DOMContentLoaded', function() {
+            var loadingBar = document.getElementById('loading-bar');
+            loadingBar.style.width = '100%';
+        });
+
+        // Redirect after 3 seconds
+        setTimeout(function() {
+            // Replace this with your flash message and redirect logic
+            flash('Account has been successfully created!', 'success');
+            window.location.href = '/home';
+        }, 3000);
+    </script>
+</body>
+</html>

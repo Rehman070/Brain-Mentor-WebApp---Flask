@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Brain Mentor - Doctor Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
+        crossorigin="anonymous">
+
+    <link rel="apple-touch-icon" sizes="76x76" href="static/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="static/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="static/images/favicon-16x16.png">
+    <link rel="manifest" href="static/images/site.webmanifest">
+    <link rel="mask-icon" href="static/images/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+    <script src="https://kit.fontawesome.com/b33b219100.js" crossorigin="anonymous"></script>
+
+    <script src="/static/js/testimonail.js" defer></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <style>
+        table {
+            width: 99%;
+            margin: 0 auto;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 8px;
+        }
+        tr {
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .button-container {
+            width: 120px; /* Adjust the width as needed */
+        }
+
+        .button.accept, .button.reject {
+            width: 100%; /* Make buttons fill the container */
+            background-color: #4CAF50; /* Green for accept button */
+            border: none;
+            color: white;
+            padding: 8px 0; /* Adjust padding as needed */
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.4s;
+        }
+
+        .button.reject {
+            background-color: #f44336; /* Red for reject button */
+        }
+
+        .button.accept:hover {
+            background-color: #000;
+        }
+
+        .button.reject:hover {
+            background-color: #000;
+        }
+    </style>
+</head>
+
+<body>
+     <!-- Doctor Login Message -->
+     {% with messages = get_flashed_messages(with_categories=true) %}
+     {% if messages %}
+         {% for category, message in messages %}
+         <div class="alert alert-{{category}} alert-dismissible fade show"
+             role="alert">
+             <strong>Message:</strong>{{message}}
+         </div>
+         <script>
+             document.addEventListener("DOMContentLoaded", function() {
+                 setTimeout(function() {
+                     let alert = document.querySelector(".alert-{{category}}");
+                     if (alert) {
+                         alert.style.display = "none";
+                     }
+                 }, 2200); // 2200 milliseconds = 1 second
+             });
+         </script>
+         {% endfor %}
+     {% endif %}
+ {% endwith %}
+    <!-- This is Nav Bar -->
+    <header>
+        <nav>
+            <input type="checkbox" id="check">
+            <label for="check" class="checkbtn">
+                <i class="fas fa-bars"></i>
+            </label>
+            <label class="logo">Brain Mentor</label>
+            <ul id="menu">
+                <li><a href="/doctor_dashboard">Requests</a></li>
+                <li><a href="#">Detection</a></li>
+                <li><a href="#">Treatments</a></li>
+                <li><a href="#">Blogs</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Appointment Approval -->
+    <table>
+        <thead>
+            <tr>
+                <th>Appointment ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Number</th>
+                <th>Date</th>
+                <th>Time Slot</th>
+                <th>Consultation Type</th>
+                <th>Action</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="appointments-table">
+            <!-- Appointments will be dynamically added here -->
+        </tbody>
+    </table>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Fetching data from API and populating the table
+            fetchAppointments();
+
+            // Function to fetch appointments
+            function fetchAppointments() {
+                const doctorId = {{ doctor_id }};
+                fetch("/get_appointments", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ doctor_id: doctorId })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        const appointments = data.appointments;
+                        const tableBody = document.getElementById("appointments-table");
+                        appointments.forEach(appointment => {
+                            const row = document.createElement("tr");
+                            row.innerHTML = `
+                                <td>${appointment.appointment_id}</td>
+                                <td>${appointment.name}</td>
+                                <td>${appointment.email}</td>
+                                <td>${appointment.number}</td>
+                                <td>${appointment.date}</td>
+                                <td>${appointment.timeslot}</td>
+                                <td>${appointment.consultation}</td>
+                                <td>
+                                    <div class="button-container">
+                                        <button class="button accept" onclick="cancelAppointment(${appointment.appointment_id})">Accept</button>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="button-container">
+                                        <button class="button reject" onclick="cancelAppointment(${appointment.appointment_id})">Reject</button>
+                                    </div>
+                                </td>
+                            `;
+                            tableBody.appendChild(row);
+                        });
+                    })
+                    .catch(error => console.error("Error fetching appointments:", error));
+            }
+
+            // Function to cancel appointment
+            function cancelAppointment(appointmentId) {
+                // Call your API to cancel the appointment with the given appointmentId
+                console.log("Cancel appointment with ID:", appointmentId);
+            }
+        });
+    </script>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="footer-col">
+                    <h2>Location</h2>
+                    <span><h5>Address:</h5>
+                        Pakistan Kamra Rd,<br>
+                        Attock City, 43600<br></span>
+                    <span><h5>Phone:</h5>(750) 435-6352</span>
+                    <span><h5>Fax:</h5>(750) 435-6352</span>
+                </div>
+                <div class="footer-col">
+                    <h2>Blog</h2>
+                    <ul>
+                        <li><a href="#">Right Sidebar</a></li>
+                        <li><a href="#">Left Sidebar</a></li>
+                        <li><a href="#">Full Width </a></li>
+                        <li><a href="#">Blog Grid </a></li>
+                        <li><a href="#">Blog Details </a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h2>Appointment</h2>
+                    <p>Lorem ipsum dolor, sit amet consectetur<br>
+                        adipisicing elit. nemo obcaecati.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-google-plus"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+            <div class="copyright">
+                <span>© 2023 BrainMentor. All rights reserved.</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var links = document.querySelectorAll("#menu a");
+
+            // Add click event listener to each link
+            links.forEach(function (link) {
+                link.addEventListener("click", function (event) {
+                    // Remove "active" class from all links
+                    links.forEach(function (otherLink) {
+                        otherLink.classList.remove("active");
+                    });
+
+                    // Add "active" class to the clicked link
+                    this.classList.add("active");
+                });
+            });
+
+            // Set initial active link based on the current URL path
+            var currentPath = window.location.pathname;
+            links.forEach(function (link) {
+                // Check if the current URL contains the link's href value
+                if (currentPath.indexOf(link.getAttribute("href")) !== -1) {
+                    link.classList.add("active");
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>

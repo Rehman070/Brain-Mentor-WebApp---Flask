@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctors Marker Map</title>
+    {{ map }}
+</head>
+<body>
+    <script>
+        var searchControl = new L.Control.Search({
+            layer: marker_layer,
+            propertyName: 'title',
+            marker: false,
+            moveToLocation: function (latlng, title, map) {
+                map.setView(latlng, 17); // set the zoom level here
+            }
+        });
+        searchControl.on('search:locationfound', function (e) {
+            e.layer.openPopup();
+        });
+        map.addControl(searchControl);
+    </script>
+</body>
+</html>

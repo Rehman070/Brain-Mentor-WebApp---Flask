@@ -7,14 +7,18 @@ from openai import ChatCompletion
 import folium
 from werkzeug.security import generate_password_hash, check_password_hash
 import numpy as np
+from dateutil import parser
+
 import tensorflow as tf
-from PIL import Image
+#from PIL import Image
 import openai
 from authlib.integrations.flask_client import OAuth
 from flask_mail import Mail, Message
 import json
 import requests
 from folium.plugins import Geocoder
+from folium import plugins
+
 
 app = Flask(__name__)
 
@@ -27,7 +31,7 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'index'
 
 # Set your OpenAI GPT-3 API key here
-openai.api_key = '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'
+openai.api_key = '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'
 
 # Provided intents data
 intents_data = {"intents": [
@@ -90,8 +94,6 @@ class Patients(UserMixin, db.Model):
         return '<User %r>' % self.username
 
 # Create a Model of Blogs
-
-
 class Blogs(db.Model):
     blog_id = db.Column(db.Integer, primary_key=True)
     blog_type = db.Column(db.String(80), nullable=False)
@@ -120,31 +122,40 @@ def index():
         password = request.form.get('password')
         action = request.form.get('action')
 
-        existing_user = Patients.query.filter_by(username=username).first()
+        existing_patient = Patients.query.filter_by(username=username).first()
+        existing_doctor = web_user.query.filter_by(email=email).first()
 
-        if not existing_user:
-            if action == "signup":
-                # It's a signup attempt
-                new_user = Patients(username=username,
-                                    email=email, password=password)
-                db.session.add(new_user)
+        if action == "signup":
+            if not existing_patient:
+                # It's a patient signup attempt
+                new_patient = Patients(username=username,
+                                       email=email, password=password)
+                db.session.add(new_patient)
                 db.session.commit()
-                flash('Account has been successfully created!', 'success')
+                flash(' Account has been successfully created!', 'success')
                 return redirect('/home')
             else:
-                # It's a login attempt with non-existent credentials
-                flash('Invalid credentials. Please try again.', 'danger')
-        else:
-            # If the username exists, it's a login attempt
-            if existing_user.password == password and email == existing_user.email and existing_user.username == username:
-                login_user(existing_user)
-                flash('Login successful!', 'success')
-                return redirect('/home')
+                flash(' Account already exists. Please log in.', 'warning')
+        elif action == "login":
+            if existing_patient:
+                # It's a patient login attempt
+                if existing_patient.password == password and email == existing_patient.email:
+                    login_user(existing_patient)
+                    flash(' Login successful!', 'success')
+                    return redirect('/home')
+                else:
+                    flash(' Invalid credentials. Please try again.', 'danger')
+            elif existing_doctor:
+                # It's a doctor login attempt
+                if existing_doctor.password == password and email == existing_doctor.email and existing_doctor.name == username:
+                    flash(' Doctor login successful!', 'success')
+                    return render_template('doctor_dashboard.html', doctor_id=existing_doctor.doctor_id)
+                else:
+                    flash(' Invalid doctor credentials. Please try again.', 'danger')
             else:
-                flash('Invalid credentials. Please try again.', 'danger')
+                flash(' No account found. Please sign up first.', 'warning')
 
     return render_template('index.html')
-
 
 @app.route('/logout')
 def logout():
@@ -173,9 +184,9 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
-app.config['MAIL_USERNAME'] = 'noreplay'
+app.config['MAIL_USERNAME'] = 'abdurrehman5732@gmail.com'
 app.config['MAIL_PASSWORD'] = 'hryw fkka ihqy vecz'  # Use App Password if 2-Step Verification is enabled
-app.config['MAIL_DEFAULT_SENDER'] = 'noreplay'
+app.config['MAIL_DEFAULT_SENDER'] = 'abdurrehman5732@gmail.com'
 
 mail = Mail(app)
 
@@ -296,10 +307,6 @@ def predict():
         return render_template('Detection.html', message=f'Error: {str(e)}')
 
 
-@app.route('/doctors')
-def Doctors():
-    return render_template('Doctors.html')
-
 
 @app.route('/appointment')
 def Appointment():
@@ -310,6 +317,7 @@ def Appointment():
 def Patient_Treat():
     return render_template('Patient_Treat.html')
 
+#Doctor Location & Markers
 @app.route('/doctors_marker')
 def Doctors_Markers():
     # Coordinates for the center of Islamabad, Pakistan
@@ -319,89 +327,37 @@ def Doctors_Markers():
     map = folium.Map(
         location=pakistan_isb_coordinates,
         tiles=None,
-        zoom_start=12,  # Adjust the zoom level as needed
+        zoom_start=13,  # Adjust the zoom level as needed
     )
-    
+
+    # Create a FeatureGroup layer to contain markers
+    marker_layer = folium.FeatureGroup(name='Markers').add_to(map)
+
     # Add tile layers
     folium.TileLayer('CartodbPositron').add_to(map)
     folium.TileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', name='CartoDBDarkMatter', attr="CartoDBDarkMatter").add_to(map)
-    folium.TileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', name='OpenTopoMap', attr="OpenTopoMap").add_to(map)
     folium.TileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', name='Esri', attr="Esri").add_to(map)
     folium.TileLayer('OpenStreetMap').add_to(map)
 
     # Add layers control over the map
-    folium.LayerControl().add_to(map)    
+    folium.LayerControl().add_to(map)
 
-    Geocoder().add_to(map)
+    # Add search functionality to the FeatureGroup layer
+    search = plugins.Search(layer=marker_layer, geom_type='Marker', search_zoom=15).add_to(map)
 
+    # Define markers as in your original code
     # Add a marker to the map
     folium.Marker(
         location=pakistan_isb_coordinates,
         popup='Islamabad, Pakistan',
         tooltip='Islamabad, Pakistan',
-        icon=folium.Icon(color='red', icon='location-dot', prefix='fa')
-    ).add_to(map)
+        icon=folium.Icon(color='red', icon='location-dot', prefix='fa'),
+        title='Islamabad'  # Add the location name as the title
+    ).add_to(marker_layer)
 
-    # Add a marker to the map
-    marker_location = [34.223299962163615, 72.263259854991]
-    marker_popup_content = """
-    <div>
-        <h4 style="color:blue;">Brain & Spine Clinic</h4>
-        <img src="https://media.istockphoto.com/id/177373093/photo/indian-male-doctor.jpg?s=612x612&w=0&k=20&c=5FkfKdCYERkAg65cQtdqeO_D0JMv6vrEdPw3mX1Lkfg=" alt="Image" style="width:100px;height:100px;">
-        <p>Address: Clinic Address, City, Country</p>
-        <p>Email: clinic@example.com</p>
-        <p>Open Hours: Monday to Friday, 9:00 AM - 5:00 PM</p>
-    </div>
-    """
-
-    folium.Marker(
-        location=marker_location,
-        tooltip='Brain & Spine Clinic',
-        popup=folium.Popup(html=marker_popup_content, max_width=300),
-        icon=folium.Icon(color='green', icon='user-doctor', prefix='fa')
-    ).add_to(map)
-
-    # Add a marker to the map
-    marker_location = [33.71081684674506, 73.02100506625507]
-    marker_popup_content = """
-    <div>
-        <h4 style="color:blue;">Dr. Alamgir Neuro Surgeon</h4>
-        <img src="https://media.istockphoto.com/id/177373093/photo/indian-male-doctor.jpg?s=612x612&w=0&k=20&c=5FkfKdCYERkAg65cQtdqeO_D0JMv6vrEdPw3mX1Lkfg=" alt="Image" style="width:100px;height:100px;">
-        <p>Address: Clinic Address, City, Country</p>
-        <p>Email: clinic@example.com</p>
-        <p>Open Hours: Monday to Friday, 9:00 AM - 5:00 PM</p>
-    </div>
-    """
-
-    folium.Marker(
-        location=marker_location,
-        tooltip='Dr. Alamgir Neuro Surgeon',
-        popup=folium.Popup(html=marker_popup_content, max_width=300),
-        icon=folium.Icon(color='green', icon='user-doctor', prefix='fa')
-    ).add_to(map)
-
-    # Add a marker to the map
-    marker_location = [33.694266983374575, 72.99629625361848]
-    marker_popup_content = """
-    <div>
-        <h4 style="color:blue;">Dr Akbar Khan</h4>
-        <img src="https://media.istockphoto.com/id/177373093/photo/indian-male-doctor.jpg?s=612x612&w=0&k=20&c=5FkfKdCYERkAg65cQtdqeO_D0JMv6vrEdPw3mX1Lkfg=" alt="Image" style="width:100px;height:100px;">
-        <p>Address: Clinic Address, City, Country</p>
-        <p>Email: clinic@example.com</p>
-        <p>Open Hours: Monday to Friday, 9:00 AM - 5:00 PM</p>
-    </div>
-    """
-
-    folium.Marker(
-        location=marker_location,
-        tooltip='Dr Akbar Khan',
-        popup=folium.Popup(html=marker_popup_content, max_width=300),
-        icon=folium.Icon(color='green', icon='user-doctor', prefix='fa')
-    ).add_to(map)
-
-    # Add a marker to the map
-    marker_location = [33.67596469823713, 73.06711812392459]
-    marker_popup_content = """
+    # Add markers for hospitals and doctors
+    markers = [
+        {"location": [34.223299962163615, 72.263259854991], "name": "Brain & Spine Clinic", "type": "doctor", "popup_content": """
     <div>
         <h4 style="color:blue;">Prof. Dr Inayat Ullah Khan</h4>
         <img src="https://media.istockphoto.com/id/177373093/photo/indian-male-doctor.jpg?s=612x612&w=0&k=20&c=5FkfKdCYERkAg65cQtdqeO_D0JMv6vrEdPw3mX1Lkfg=" alt="Image" style="width:100px;height:100px;">
@@ -409,29 +365,83 @@ def Doctors_Markers():
         <p>Email: clinic@example.com</p>
         <p>Open Hours: Monday to Friday, 9:00 AM - 5:00 PM</p>
     </div>
-    """
-
-    folium.Marker(
-        location=marker_location,
-        tooltip='Prof. Dr Inayat Ullah Khan',
-        popup=folium.Popup(html=marker_popup_content, max_width=300),
-        icon=folium.Icon(color='green', icon='user-doctor', prefix='fa')
-    ).add_to(map)
-
-    # Add markers for hotel, hospital, restaurant, and museum
-    markers = [
-        {"location": [33.6844, 73.0479], "name": "Hotel ABC", "type": "hotel", "icon": "bed"},
-        {"location": [33.6804, 73.0471], "name": "City Hospital", "type": "hospital", "icon": "hospital"},
-        {"location": [33.6865, 73.0512], "name": "Fine Dining Restaurant", "type": "restaurant", "icon": "cutlery"},
-        {"location": [33.6883, 73.0495], "name": "National Museum", "type": "museum", "icon": "university"},
+    """},
+        {"location": [33.71081684674506, 73.02100506625507], "name": "Dr. Alamgir Neuro Surgeon", "type": "doctor","popup_content": """
+    <div>
+        <h4 style="color:blue;">Prof. Dr Inayat Ullah Khan</h4>
+        <img src="https://media.istockphoto.com/id/177373093/photo/indian-male-doctor.jpg?s=612x612&w=0&k=20&c=5FkfKdCYERkAg65cQtdqeO_D0JMv6vrEdPw3mX1Lkfg=" alt="Image" style="width:100px;height:100px;">
+        <p>Address: Clinic Address, City, Country</p>
+        <p>Email: clinic@example.com</p>
+        <p>Open Hours: Monday to Friday, 9:00 AM - 5:00 PM</p>
+    </div>
+    """},
+        {"location": [33.694266983374575, 72.99629625361848], "name": "Dr Akbar Khan", "type": "doctor","popup_content": """
+    <div>
+        <h4 style="color:blue;">Prof. Dr Inayat Ullah Khan</h4>
+        <img src="https://media.istockphoto.com/id/177373093/photo/indian-male-doctor.jpg?s=612x612&w=0&k=20&c=5FkfKdCYERkAg65cQtdqeO_D0JMv6vrEdPw3mX1Lkfg=" alt="Image" style="width:100px;height:100px;">
+        <p>Address: Clinic Address, City, Country</p>
+        <p>Email: clinic@example.com</p>
+        <p>Open Hours: Monday to Friday, 9:00 AM - 5:00 PM</p>
+    </div>
+    """},
+        {"location": [33.67596469823713, 73.06711812392459], "name": "Prof. Dr Inayat Ullah Khan", "type": "doctor","popup_content": """
+    <div>
+        <h4 style="color:blue;">Prof. Dr Inayat Ullah Khan</h4>
+        <img src="https://media.istockphoto.com/id/177373093/photo/indian-male-doctor.jpg?s=612x612&w=0&k=20&c=5FkfKdCYERkAg65cQtdqeO_D0JMv6vrEdPw3mX1Lkfg=" alt="Image" style="width:100px;height:100px;">
+        <p>Address: Clinic Address, City, Country</p>
+        <p>Email: clinic@example.com</p>
+        <p>Open Hours: Monday to Friday, 9:00 AM - 5:00 PM</p>
+    </div>
+    """},
+        {"location": [33.6844, 73.0479], "name": "Hotel ABC", "type": "hotel","popup_content": """
+    <div>
+        <h4 style="color:blue;">Prof. Dr Inayat Ullah Khan</h4>
+        <img src="https://media.istockphoto.com/id/177373093/photo/indian-male-doctor.jpg?s=612x612&w=0&k=20&c=5FkfKdCYERkAg65cQtdqeO_D0JMv6vrEdPw3mX1Lkfg=" alt="Image" style="width:100px;height:100px;">
+        <p>Address: Clinic Address, City, Country</p>
+        <p>Email: clinic@example.com</p>
+        <p>Open Hours: Monday to Friday, 9:00 AM - 5:00 PM</p>
+    </div>
+    """},
+        {"location": [33.6804, 73.0471], "name": "City Hospital", "type": "hospital","popup_content": """
+    <div>
+        <h4 style="color:blue;">Prof. Dr Inayat Ullah Khan</h4>
+        <img src="https://media.istockphoto.com/id/177373093/photo/indian-male-doctor.jpg?s=612x612&w=0&k=20&c=5FkfKdCYERkAg65cQtdqeO_D0JMv6vrEdPw3mX1Lkfg=" alt="Image" style="width:100px;height:100px;">
+        <p>Address: Clinic Address, City, Country</p>
+        <p>Email: clinic@example.com</p>
+        <p>Open Hours: Monday to Friday, 9:00 AM - 5:00 PM</p>
+    </div>
+    """},
+      
+        {"location": [33.6883, 73.0495], "name": "National Museum", "type": "museum","popup_content": """
+    <div>
+        <h4 style="color:blue;">Prof. Dr Inayat Ullah Khan</h4>
+        <img src="https://media.istockphoto.com/id/177373093/photo/indian-male-doctor.jpg?s=612x612&w=0&k=20&c=5FkfKdCYERkAg65cQtdqeO_D0JMv6vrEdPw3mX1Lkfg=" alt="Image" style="width:100px;height:100px;">
+        <p>Address: Clinic Address, City, Country</p>
+        <p>Email: clinic@example.com</p>
+        <p>Open Hours: Monday to Friday, 9:00 AM - 5:00 PM</p>
+    </div>
+    """},
+    {"location": [33.95126074394443, 71.43232422698537], "name": "Nawab Market", "type": "Market","popup_content": """
+    <div>
+        <h4 style="color:blue;">Prof. Dr Inayat Ullah Khan</h4>
+        <img src="https://media.istockphoto.com/id/177373093/photo/indian-male-doctor.jpg?s=612x612&w=0&k=20&c=5FkfKdCYERkAg65cQtdqeO_D0JMv6vrEdPw3mX1Lkfg=" alt="Image" style="width:100px;height:100px;">
+        <p>Address: Clinic Address, City, Country</p>
+        <p>Email: clinic@example.com</p>
+        <p>Open Hours: Monday to Friday, 9:00 AM - 5:00 PM</p>
+    </div>
+    """},
     ]
 
-    for marker in markers:
-        folium.Marker(
-            location=marker["location"],
-            popup=folium.Popup(html=f"<b>{marker['name']}</b>", max_width=300),
-            icon=folium.Icon(color='blue' if marker["type"] == "hospital" else 'green', icon=marker["icon"], prefix='fa')
-        ).add_to(map)
+    for marker_info in markers:
+        icon = 'user-doctor' if marker_info["type"] == "doctor" else 'hospital' if marker_info["type"] == "hospital" else 'university'
+        
+        # Add a marker to the map
+        marker = folium.Marker(
+            location=marker_info["location"],
+            popup=folium.Popup(html=f"<b>{marker_info['name']}</b>{marker_info.get('popup_content', '')}", max_width=300),
+            icon=folium.Icon(color='blue' if marker_info["type"] == "hospital" else 'green', icon=icon, prefix='fa'),
+            title=marker_info['name']  # Add the location name as the title
+        ).add_to(marker_layer)
 
     return map._repr_html_()
 
@@ -462,8 +472,6 @@ def blogs_details(id):
     return render_template('Blogs_Details.html', blog=blog)
 
 # Delete Blog
-
-
 @app.route("/delete/<int:id>")
 def del_post(id):
     blog = Blogs.query.get(id)
@@ -488,5 +496,174 @@ def edit_post(id):
     return render_template('Edit_post.html', blog=blog)
 
 
+from sqlalchemy import create_engine, MetaData
+
+
+# Fetching doctors appointments informaton  from the database and passing json
+@app.route('/get_appointments', methods=['POST'])
+def get_appointments():
+    doctor_id = request.json['doctor_id']
+    appointments = patient_appointments.query.filter_by(doctor_id=doctor_id).all()
+    appointments_list = []
+    for ap in appointments:
+        appointment_data = {
+            'appointment_id': ap.appointment_id,
+            'doctor_id': ap.doctor_id,
+            'name': ap.name,
+            'email': ap.email,
+            'number': ap.number,
+            'date': ap.date,
+            'timeslot': ap.timeslot,
+            'consultation':ap.consultation
+        }
+        appointments_list.append(appointment_data)
+
+    return jsonify(appointments=appointments_list)
+
+
+# Adding doctors info into the database
+@app.route('/add_doctor', methods=["POST"])
+def add_doctor():
+    # Create a new doctor
+    doctor_data = [
+        {'name': 'Alice', 'designation': 'Pediatrician', 'age': 35, 'country': 'Pakistan', 'email': 'alice@example.com',
+         'password': 'password123'},
+        {'name': 'Bob', 'designation': 'Surgeon', 'age': 40, 'country': 'Pakistan', 'email': 'bob@example.com',
+         'password': 'password456'},
+        {'name': 'Emma', 'designation': 'Cardiologist', 'age': 45, 'country': 'Pakistan', 'email': 'emma@example.com',
+         'password': 'password789'},
+        {'name': 'David', 'designation': 'Gynecologist', 'age': 50, 'country': 'Pakistan', 'email': 'david@example.com',
+         'password': 'passwordABC'}
+    ]
+
+    for obj in doctor_data:
+        new_doctor = web_user(name=obj['name'], designation=obj['designation'], age=obj['age'], country=obj['country'], email=obj['email'], password=obj['password'])
+
+        # Add the new doctor to the database session
+        db.session.add(new_doctor)
+
+        # Commit the session to save changes to the database
+        db.session.commit()
+
+    return "New doctor added successfully!"
+
+
+# Fetching all doctors from database for doctor route and showing there info in cards
+@app.route('/get_doctors')
+def get_doctors():
+    all_doctors = web_user.query.all()
+    doctors_list = [{'doctor_id': doctor.doctor_id,'name': doctor.name, 'designation': doctor.designation, 'age': doctor.age, 'country': doctor.country} for doctor in all_doctors]
+
+    return jsonify(doctors=doctors_list)
+
+# Rendering doctors page
+@app.route('/doctors')
+def Doctors():
+    all_doctors = web_user.query.all()
+    return render_template('Doctors.html', doctors=all_doctors)
+
+
+# Creating appointment for the patient
+@app.route('/make_appointment', methods=["POST"])
+def make_appointment():
+    # Create a new doctor
+    doctor_id = request.form['doctor_id']
+    name = request.form['name']
+    email = request.form['email']
+    number =request.form['number']
+    # Format date
+    date = parser.parse(request.form['date']).strftime('%d/%m/%Y')
+
+    # Format time slot
+    time_slot = request.form['timeslot']
+
+    # Map time slot values to appropriate format
+    time_slot_mapping = {
+        "9am-12pm": "9 AM to 12 PM",
+        "1pm-4pm": "1 PM to 4 PM"
+    }
+
+    # Check if the time slot value is valid
+    if time_slot in time_slot_mapping:
+        time_slot = time_slot_mapping[time_slot]
+    else:
+        return "Invalid time slot"
+
+
+    consultation = request.form['consultation']
+
+
+
+    new_appointment = patient_appointments(name=name, doctor_id=doctor_id, email=email, number=number, date=date, timeslot=time_slot, consultation=consultation)
+
+        # Add the new doctor to the database session
+    db.session.add(new_appointment)
+
+    # Commit the session to save changes to the database
+    db.session.commit()
+
+    flash(' Your Appointment has successfully Booked', 'success')
+    return redirect(url_for("Appointment"))
+
+
+
+# Define  database model for the doctor
+class Doctor(db.Model):
+    doctor_id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
+    name = db.Column(db.String(80), nullable=False)
+    designation = db.Column(db.String(120), nullable=False)
+    age = db.Column(db.Integer, nullable=False)
+    country = db.Column(db.String(80), nullable=False)
+    email = db.Column(db.String(80), nullable=False)
+    password = db.Column(db.String(80), nullable=False)
+
+    def __repr__(self):
+        return '<Doctors %r>' % self.name
+
+# Define  database model for the doctor
+class web_user(db.Model):
+    doctor_id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
+    name = db.Column(db.String(80), nullable=False)
+    designation = db.Column(db.String(120), nullable=False)
+    age = db.Column(db.Integer, nullable=False)
+    country = db.Column(db.String(80), nullable=False)
+    email = db.Column(db.String(80), nullable=False)
+    password = db.Column(db.String(80), nullable=False)
+
+    def __repr__(self):
+        return '<web_user %r>' % self.name
+
+# Define  database model for the appointments
+class appointment(db.Model):
+    appointment_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    doctor_id = db.Column(db.Integer, nullable=False)
+    name = db.Column(db.String(120), nullable=False)
+    email = db.Column(db.String(120), nullable=False)
+    number = db.Column(db.String(50), nullable=False)
+    date = db.Column(db.String(90), nullable=False)
+    timeslot = db.Column(db.String(90), nullable=False)
+    consultation = db.Column(db.String(190), nullable=False)
+
+
+    def __repr__(self):
+        return '<appointment %r>' % self.name
+
+class patient_appointments(db.Model):
+    appointment_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    doctor_id = db.Column(db.Integer, nullable=False)
+    name = db.Column(db.String(120), nullable=False)
+    email = db.Column(db.String(120), nullable=False)
+    number = db.Column(db.String(50), nullable=False)
+    date = db.Column(db.String(90), nullable=False)
+    timeslot = db.Column(db.String(90), nullable=False)
+    consultation = db.Column(db.String(190), nullable=False)
+
+
+    def __repr__(self):
+        return '<appointment %r>' % self.name
+
 if __name__ == '__main__':
+    # creating new tables if not previously has been made
+    db.create_all()
+
     app.run(debug=True,host='0.0.0.0', port=appConf.get("FLASK_PORT"))
