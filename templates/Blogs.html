@@ -1,171 +1,264 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Brain Mentor - Blogs</title>
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" type="text/css" href="/static/style.css">
-        <link rel="stylesheet" type="text/css" href="/static/chatbot.css">
-        <link
-            href="https://fonts.googleapis.com/css2?family=Poppins:wght@200&display=swap"
-            rel="stylesheet">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Brain Mentor - Blogs</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+    <link rel="stylesheet" type="text/css" href="/static/chatbot.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200&display=swap" rel="stylesheet">
 
-        <link rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
-        <link
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-            rel="stylesheet"
-            integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
-            crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
+        crossorigin="anonymous">
 
-        <link rel="apple-touch-icon" sizes="76x76" href="static/images/apple-touch-icon.png">
-        <link rel="icon" type="image/png" sizes="32x32"
-            href="static/images/favicon-32x32.png">
-        <link rel="icon" type="image/png" sizes="16x16"
-            href="static/images/favicon-16x16.png">
-        <link rel="manifest" href="static/images/site.webmanifest">
-        <link rel="mask-icon" href="static/images/safari-pinned-tab.svg" color="#5bbad5">
-        <meta name="msapplication-TileColor" content="#da532c">
-        <meta name="theme-color" content="#ffffff">
-        <script src="https://kit.fontawesome.com/b33b219100.js"
-            crossorigin="anonymous"></script>
+    <link rel="apple-touch-icon" sizes="76x76" href="static/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="static/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="static/images/favicon-16x16.png">
+    <link rel="manifest" href="static/images/site.webmanifest">
+    <link rel="mask-icon" href="static/images/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+    <script src="https://kit.fontawesome.com/b33b219100.js" crossorigin="anonymous"></script>
 
-        <script src="/static/js/testimonail.js" defer></script>
-        <script
-            src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    </head>
+    <script src="/static/js/testimonail.js" defer></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <style>
+        /* Additional CSS for form styling */
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
 
-    <body>
-       
-        <!-- This is Nav Bar -->
-        <header>
-            <nav>
-                <input type="checkbox" id="check">
-                <label for="check" class="checkbtn">
-                    <i class="fas fa-bars"></i>
-                </label>
-                <label class="logo">Brain Mentor</label>
-                <ul id="menu">
-                    <li><a href="/home">Home</a></li>
-                    <li><a href="/detection">Detection</a></li>
-                    <li><a href="/doctors">Doctors</a></li>
-                    <li><a href="/patient_treat">Treatments</a></li>
-                    <li><a href="/blog">Blogs</a></li>
-                    <li><a href="/logout">Logout</a></li>
-                </ul>
-            </nav>
-        </header>
+        form {
+            width: 100%;
+    max-width: 100%; /* Set maximum width to prevent it from stretching too wide on larger screens */
+    margin: auto;
+    padding: 30px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+        }
 
-        <!-- Home Content -->
-        <main>
+        .form-group {
+            margin-bottom: 20px;
+        }
 
-            <form method="POST", action="/blog">
-                <div class="container">
-                <div class="mb-3" style="margin-top:40px">
-                    <label for="text" class="form-label">Blog Type</label>
-                    <input type="text" class="form-control" id="type" placeholder="Blog Type" name="type">
+        .form-label {
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .file-upload-label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        .btn-dark {
+            background-color: #343a40;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .btn-dark:hover {
+            background-color: #1c1e21;
+        }
+
+        
+    </style>
+</head>
+
+<body>
+     <!-- Account Creation Message -->
+     {% with messages = get_flashed_messages(with_categories=true) %}
+     {% if messages %}
+         {% for category, message in messages %}
+         <div class="alert alert-{{category}} alert-dismissible fade show"
+             role="alert">
+             <strong>Message:</strong>{{message}}
+         </div>
+         <script>
+             document.addEventListener("DOMContentLoaded", function() {
+                 setTimeout(function() {
+                     let alert = document.querySelector(".alert-{{category}}");
+                     if (alert) {
+                         alert.style.display = "none";
+                     }
+                 }, 2200); // 2200 milliseconds = 1 second
+             });
+         </script>
+         {% endfor %}
+     {% endif %}
+ {% endwith %}
+
+    <!-- This is Nav Bar -->
+    <header>
+        <nav>
+            <input type="checkbox" id="check">
+            <label for="check" class="checkbtn">
+                <i class="fas fa-bars"></i>
+            </label>
+            <label class="logo">Brain Mentor</label>
+            <ul id="menu">
+                <li><a href="/home">Home</a></li>
+                <li><a href="/detection">Detection</a></li>
+                <li><a href="/doctors">Doctors</a></li>
+                <li><a href="/patient_treat">Treatments</a></li>
+                <li><a href="/blog">Blogs</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Home Content -->
+    <main>
+
+        <form method="POST" action="/blog" enctype="multipart/form-data">
+            <div class="container">
+                <div class="form-group">
+                    <label for="type" class="form-label">Blog Type</label>
+                    <input type="text" class="form-control" id="type" placeholder="Blog Type" name="type" required>
                 </div>
-                <div class="mb-3">
-                    <label for="text" class="form-label">Title</label>
-                    <input type="text" class="form-control" id="title" placeholder="Title Here" name="title">
+                <div class="form-group">
+                    <label for="title" class="form-label">Title</label>
+                    <input type="text" class="form-control" id="title" placeholder="Title Here" name="title" required minlength="5">
                 </div>
-                <div class="mb-3">
+                <div class="form-group">
                     <label for="author" class="form-label">Author</label>
-                    <input type="text" class="form-control" id="author" placeholder="Author Name" name="author">
+                    <input type="text" class="form-control" id="author" placeholder="Author Name" name="author" required minlength="5">
                 </div>
-                <div class="mb-3">
-                    <label for="text" class="form-label">Content</label>
-                    <textarea class="form-control" id="text" rows="6" name="text"></textarea>
+                <div class="form-group">
+                    <label for="content" class="form-label">Content</label>
+                    <textarea class="form-control" id="content" rows="6" name="content" minlength="200" required></textarea>
+                    <div class="invalid-feedback">Content must be at least 200 characters long.</div>
+                </div>                
+                <div class="form-group">
+                    <label for="image" class="form-label">Upload Image</label>
+                    <input type="file" class="form-control" id="image" name="image" required>
                 </div>
-                
-                <div class="col-12">
-                    <button type="submit" class="btn btn-dark" style="margin-top:10px">POST</button>
+        
+                <div class="col-6" style="margin-left: 480px; margin-top: 60px;">
+                    <button type="submit" class="btn btn-dark">Submit</button>
                 </div>
-                </div>
-                </form>
+            </div>
+        </form>
 
-            
-                    <!-- Footer -->
-                    <footer class="footer">
-                        <div class="container">
-                            <div class="row">
-                                <div class="footer-col">
-                                    <h2>Location</h2>
-                                    <span><h5>Address:</h5>
-                                        Pakistan Kamra Rd,<br>
-                                        Attock City, 43600<br></span>
-                                    <span><h5>Phone:</h5>(750) 435-6352</span>
-                                    <span><h5>Fax:</h5>(750) 435-6352</span>
-                                </div>
-                                <div class="footer-col">
-                                    <h2>Blog</h2>
-                                    <ul>
-                                        <li><a href="#">Right Sidebar</a></li>
-                                        <li><a href="#">Left Sidebar</a></li>
-                                        <li><a href="#">Full Width </a></li>
-                                        <li><a href="#">Blog Grid </a></li>
-                                        <li><a href="#">Blog Details </a></li>
-                                    </ul>
-                                </div>
-                                <div class="footer-col">
-                                    <h2>Appointment</h2>
-                                    <p>Lorem ipsum dolor, sit amet consectetur<br>
-                                        adipisicing elit. nemo obcaecati.</p>
-                                    <div class="social-links">
-                                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                                        <a href="#"><i class="fab fa-twitter"></i></a>
-                                        <a href="#"><i
-                                                class="fab fa-linkedin-in"></i></a>
-                                        <a href="#"><i
-                                                class="fab fa-google-plus"></i></a>
-                                        <a href="#"><i class="fab fa-youtube"></i></a>
-                                    </div>
-                                </div>
-                            </div>
+        <script>
+            // Function to validate textarea content length
+            function validateContent() {
+                var contentTextarea = document.getElementById("content");
+                var content = contentTextarea.value;
+                var minLength = 200;
+        
+                if (content.length < minLength) {
+                    contentTextarea.classList.add("is-invalid");
+                    return false;
+                } else {
+                    contentTextarea.classList.remove("is-invalid");
+                    return true;
+                }
+            }
+        
+            // Add event listener to form submission
+            document.querySelector("form").addEventListener("submit", function (event) {
+                if (!validateContent()) {
+                    event.preventDefault(); // Prevent form submission if validation fails
+                }
+            });
+        </script>
+        
+        
 
-                            <hr>
-                            <div class="copyright">
-                                <span>© 2023 BrainMentor. All rights reserved.</span>
-                            </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="row">
+                    <div class="footer-col">
+                        <h2>Location</h2>
+                        <span><h5>Address:</h5>
+                            Pakistan Kamra Rd,<br>
+                            Attock City, 43600<br></span>
+                        <span><h5>Phone:</h5>(750) 435-6352</span>
+                        <span><h5>Fax:</h5>(750) 435-6352</span>
+                    </div>
+                    <div class="footer-col">
+                        <h2>Blog</h2>
+                        <ul>
+                            <li><a href="#">Right Sidebar</a></li>
+                            <li><a href="#">Left Sidebar</a></li>
+                            <li><a href="#">Full Width </a></li>
+                            <li><a href="#">Blog Grid </a></li>
+                            <li><a href="#">Blog Details </a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-col">
+                        <h2>Appointment</h2>
+                        <p>Lorem ipsum dolor, sit amet consectetur<br>
+                            adipisicing elit. nemo obcaecati.</p>
+                        <div class="social-links">
+                            <a href="#"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#"><i class="fab fa-google-plus"></i></a>
+                            <a href="#"><i class="fab fa-youtube"></i></a>
                         </div>
-                    </footer>
-                </main>
+                    </div>
+                </div>
 
-                <script
-                    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
-                    integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
-                    crossorigin="anonymous"></script>
-                    <script>
-                        document.addEventListener("DOMContentLoaded", function() {
-                            var links = document.querySelectorAll("#menu a");
-                            
-                            // Add click event listener to each link
-                            links.forEach(function(link) {
-                                link.addEventListener("click", function(event) {
-                                    // Remove "active" class from all links
-                                    links.forEach(function(otherLink) {
-                                        otherLink.classList.remove("active");
-                                    });
-                    
-                                    // Add "active" class to the clicked link
-                                    this.classList.add("active");
-                                });
-                            });
-                    
-                            // Set initial active link based on the current URL path
-                            var currentPath = window.location.pathname;
-                            links.forEach(function(link) {
-                                // Check if the current URL contains the link's href value
-                                if (currentPath.indexOf(link.getAttribute("href")) !== -1) {
-                                    link.classList.add("active");
-                                }
-                            });
-                        });
-                    </script>
+                <hr>
+                <div class="copyright">
+                    <span>© 2023 BrainMentor. All rights reserved.</span>
+                </div>
+            </div>
+        </footer>
+    </main>
 
-            </body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var links = document.querySelectorAll("#menu a");
 
-        </html>
+            // Add click event listener to each link
+            links.forEach(function (link) {
+                link.addEventListener("click", function (event) {
+                    // Remove "active" class from all links
+                    links.forEach(function (otherLink) {
+                        otherLink.classList.remove("active");
+                    });
+
+                    // Add "active" class to the clicked link
+                    this.classList.add("active");
+                });
+            });
+
+            // Set initial active link based on the current URL path
+            var currentPath = window.location.pathname;
+            links.forEach(function (link) {
+                // Check if the current URL contains the link's href value
+                if (currentPath.indexOf(link.getAttribute("href")) !== -1) {
+                    link.classList.add("active");
+                }
+            });
+        });
+    </script>
+
+</body>
+
+</html>

@@ -26,6 +26,57 @@
 
     <script src="/static/js/testimonail.js" defer></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <style>
+        /* Additional CSS for form styling */
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        form {
+            width: 100%;
+    max-width: 100%; /* Set maximum width to prevent it from stretching too wide on larger screens */
+    margin: auto;
+    padding: 30px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-weight: bold;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .file-upload-label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        .btn-dark {
+            background-color: #343a40;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .btn-dark:hover {
+            background-color: #1c1e21;
+        }
+    </style>
 </head>
 
 <body>
@@ -50,27 +101,34 @@
     </header>
 
     <!-- Home Content -->
-        <form method="POST" , action="/edit/{{blog.blog_id}}">
-            <div class="container">
-                <div class="mb-3" style="margin-top:40px">
-                    <label for="text" class="form-label">Title</label>
-                    <input type="text" class="form-control" id="title" placeholder="Title Here" name="title" value="{{blog.tit_name}}">
-                </div>
-                <div class="mb-3">
-                    <label for="author" class="form-label">Author</label>
-                    <input type="text" class="form-control" id="author" placeholder="Author Name" name="author" value="{{blog.author}}">
-                </div>
-                <div class="mb-3">
-                    <label for="text" class="form-label">Content</label>
-                    <textarea class="form-control" id="text" rows="6" name="text">{{blog.content}}</textarea>
-                </div>
-        
-                <div class="col-12">
-                    <button type="submit" class="btn btn-dark" style="margin-top:10px">SAVE</button>
-                </div>
+    <form method="POST" action="/edit/{{blog.blog_id}}" enctype="multipart/form-data">
+        <div class="container">
+            <div class="mb-3">
+                <label for="type" class="form-label">Type</label>
+                <input type="text" class="form-control" id="type" placeholder="Type Here" name="type" value="{{blog.blog_type}}">
             </div>
-        </form>
-
+            <div class="mb-3" style="margin-top:40px">
+                <label for="title" class="form-label">Title</label>
+                <input type="text" class="form-control" id="title" placeholder="Title Here" name="title" value="{{blog.tit_name}}">
+            </div>
+            <div class="mb-3">
+                <label for="author" class="form-label">Author</label>
+                <input type="text" class="form-control" id="author" placeholder="Author Name" name="author" value="{{blog.author}}">
+            </div>
+            <div class="mb-3">
+                <label for="content" class="form-label">Content</label>
+                <textarea class="form-control" id="content" rows="6" name="content">{{blog.content}}</textarea>
+            </div>
+            <div class="mb-3">
+                <label for="image" class="form-label">Upload Image</label>
+                <input type="file" class="form-control" id="image" name="image">
+            </div>
+            <div class="col-6" style="margin-left: 450px;">
+                <button type="submit" class="btn btn-dark" style="margin-top:10px">Update</button>
+            </div>
+        </div>
+    </form>
+    
 
 
         <!-- Footer -->

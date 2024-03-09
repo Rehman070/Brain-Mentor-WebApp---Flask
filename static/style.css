@@ -322,7 +322,7 @@ ul li a:hover {
   .appointment-button {
     padding: 10px 20px;
     font-size: 14px;
-    background-color: #4CAF50;
+    background-color: #1BBC9B;
     border: none;
     color: white;
     border-radius: 5px;
@@ -330,7 +330,7 @@ ul li a:hover {
   }
 
   .appointment-button:hover {
-    background-color: #45a049;
+    background-color: #000;
   }
 .section_doctors {
     display: flex;
@@ -888,10 +888,8 @@ button:hover {
 .heading-box {
     height: 197px;
     width: 1110px;
-    margin: 20px;
     margin-left: 120px;
     display: flex;
-    padding: 20px;
     justify-content: center;
     align-items: center;
     text-align: center;
@@ -899,17 +897,19 @@ button:hover {
 }
 
 .detection-heading {
-    height: 156px;
-    width: 832px;
-    text-align: center;
-    padding: 9px;
+    height: 70px;
+    width: 800px;
+    padding: 10px;
+    margin-top: -130px;
+    background-color: rgb(58, 58, 58); /* Black background color */
+    border-radius: 50px; /* Border radius */
 }
 
 .detection-heading p {
-    font-size: 50px;
+    font-size: 30px;
+    margin-top: 2px;
     font-weight: bold;
-    color: #000000;
-    font-style: italic;
+    color: #FFFFFF; /* White text color */
 }
 
 
@@ -1383,6 +1383,10 @@ hr {
         background-image: url(/static/images/treamnet-bg.jpg);
     
 }
+
+
+/* Blogs */
+
 
 
 

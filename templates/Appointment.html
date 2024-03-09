@@ -14,36 +14,137 @@
                     padding: 0;
                     background-color: #f4f4f4;
                 }
-
+        
                 main {
                     padding: 20px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
                 }
-
+        
                 form {
-                    background-color: #fff;
-                    border: 1px solid #ddd;
-                    border-radius: 8px;
+                    background-color: #ffffff;
+                    border: 1px solid #ccc;
+                    border-radius: 10px;
                     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-                    padding: 20px;
-                    max-width: 400px;
-                    margin: auto;
+                    padding: 25px;
+                    max-width: 500px;
+                    width: 100%;
+                    margin-top: -10px;
+                    text-align: left;
+                    position: relative; /* Position relative for absolute positioning */
                 }
-
+        
                 label {
                     display: block;
-                    margin-bottom: 8px;
+                    margin-bottom: 5px;
+                    font-weight: bold;
                 }
-
-                input, select {
-                    width: 100%;
-                    padding: 10px;
-                    margin-bottom: 15px;
+        
+                input[type="text"],
+                input[type="email"],
+                input[type="date"],
+                select {
+                    width: calc(100% - 22px);
+                    padding: 5px;
+                    margin-bottom: 20px;
                     border: 1px solid #ccc;
                     border-radius: 4px;
                     box-sizing: border-box;
                 }
+        
+                select {
+                    appearance: none;
+                    -webkit-appearance: none;
+                    -moz-appearance: none;
+                    background: transparent;
+                    background-image: url('data:image/svg+xml;utf8,<svg fill="#000000" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+                    background-repeat: no-repeat;
+                    background-position-x: calc(100% - 8px);
+                    background-position-y: center;
+                }
+        
+                .submit-btn {
+                    width: 100%;
+                    padding: 10px;
+                    background-color: #007bff;
+                    color: #ffffff;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    transition: background-color 0.3s ease;
+                }
+        
+                .submit-btn:hover {
+                    background-color: #0056b3;
+                }
+
+                /* Styles for the modal */
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    }
+
+    .modal-content {
+        background-color: #5f5f5f;
+        margin: 15% auto; /* 15% from the top and centered */
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        width: 800px; /* Set the width to 800px */
+        max-width: 70%; /* Limit the maximum width to 90% of the viewport */
+        text-align: center;
+    }
+
+    .close {
+        color: #000000;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+    }
+
+    h2 {
+        margin-top: 0;
+    }
+
+    p {
+        margin-bottom: 20px;
+    }
+
+    #okButton {
+        padding: 10px 20px;
+        background-color: #1BBC9B;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        margin-left: 280px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    #okButton:hover {
+        background-color: #000;
+    }
 
 
+
+        
+              
             </style>
         </head>
 
@@ -79,27 +180,33 @@
     </head>
 
     <body>
-         <!-- Appointment Booking Message -->
-         {% with messages = get_flashed_messages(with_categories=true) %}
-         {% if messages %}
-             {% for category, message in messages %}
-             <div class="alert alert-{{category}} alert-dismissible fade show"
-                 role="alert">
-                 <strong>Message:</strong>{{message}}
-             </div>
-             <script>
-                 document.addEventListener("DOMContentLoaded", function() {
-                     setTimeout(function() {
-                         let alert = document.querySelector(".alert-{{category}}");
-                         if (alert) {
-                             alert.style.display = "none";
-                         }
-                     }, 2200); // 2200 milliseconds = 1 second
-                 });
-             </script>
-             {% endfor %}
-         {% endif %}
-     {% endwith %}
+       <!-- Hidden dialog/modal
+<div id="myModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2 id="modalTitle"></h2>
+        <p id="modalMessage"></p>
+        <button id="okButton">OK</button>
+    </div>
+</div> -->
+<!-- Hidden dialog/modal -->
+<!-- Hidden dialog/modal -->
+<div id="myModal" class="modal">
+    <div class="modal-content" id="modalContent">
+        <span class="close">&times;</span>
+        <div class="spinner-container">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+        <h2 id="modalTitle"></h2>
+        <p id="modalMessage"></p>
+        <button id="okButton">OK</button>
+    </div>
+</div>
+
+
+
         <!-- This is Nav Bar -->
         <header>
             <nav>
@@ -118,133 +225,213 @@
                 </ul>
             </nav>
         </header>
+    
+        <h2 style="width: 500px; text-align: center; margin-left: 425px; border-radius: 50px; background-color: rgb(58, 58, 58); color: white; margin-top: 20px; margin-bottom: 15px; padding: 5px;">Book Your Appointment</h2>
+    
+        <main>
+            <form id="appointmentForm" action="/make_appointment" method="POST">
+                <input type="hidden" name="doctor_id" value="{{ request.args.get('doctor_id') }}">
+                <label for="name">Patient Name:</label>
+                <input type="text" id="name" name="name" required minlength="3" maxlength="30">
+            
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required maxlength="50">
+            
+                <label for="number">Phone Number:</label>
+                <input type="text" id="number" name="number" required maxlength="11" pattern="[0-9]{11}" inputmode="numeric">
+    
+            
+                <label for="date">Appointment Date:</label>
+                <input type="date" id="date" name="date" required>
+    
+                <label for="timeSlot">Select Time Slot:</label>
+                <select id="timeSlot" name="timeslot" required>
+                    <option value="9am-12pm">9am to 12pm</option>
+                    <option value="1pm-4pm">1pm to 4pm</option>
+                </select>
+            
+                <label for="consultation">Select consultation type:</label>
+                <select id="consultation" name="consultation" required>
+                    <option value="Online Meeting">Video Consultation</option>
+                </select>
+            
+                <button class="submit-btn" type="submit">Submit</button>
+            </form>
+        </main>
+    
 
-        <body>
-
-
-            <body>
-               
-                    <h1 style="background-color: black;margin-top: 30px; padding: 5px; color: white; text-align: center;">Book Your Appointment</h1>
-                
-
-                <main>
-                    <form action="/make_appointment" method="POST" >
-                        <input type="hidden" name="doctor_id" value="{{ request.args.get('doctor_id') }}">
-
-                        <label for="patientName">Patient Name:</label>
-                    <input type="text" id="name" name="name"  required>
-
-                        <label for="email">Email:</label>
-                    <input type="email" id="email" name="email"  required>
-
-                        <label for="phone">Phone Number:</label>
-                     <input type="text" id="number" name="number"  required>
-
-                        <label for="appointmentDate">Appointment Date:</label>
-                        <input type="date" id="appointmentDate" name="date"  required>
-
-                        <label for="timeSlot">Select Time Slot:</label>
-                        <select id="timeSlot"  name="timeslot" required>
-                            <option value="9am-12pm">9am to 12pm</option>
-                            <option value="1pm-4pm">1pm to 4pm</option>
-                        </select>
-
-                        <label for="consultation">Select consultation type:</label>
-                        <select id="consultation"  name="consultation" required>
-                            <option value="Online Meeting">Online Meeting</option>
-                            <option value="Physical Meeting">Physical Meeting</option>
-                        </select>
-
-                        <button class="submit-btn" type="submit">Submit</button>
-
-
-
-                    </form>
-                </main>
-
-
-            </body>
-            </html>
-
-
-
-
-            <!-- Footer -->
-            <footer class="footer">
-                <div class="container">
-                    <div class="row">
-                        <div class="footer-col">
-                            <h2>Location</h2>
-                            <span><h5>Address:</h5>
-                                Pakistan Kamra Rd,<br>
-                                Attock City, 43600<br><br></span>
-                            <span><h5>Phone:</h5>(750) 435-6352</span>
-                            <span><h5>Fax:</h5>(750) 435-6352</span>
-                        </div>
-                        <div class="footer-col">
-                            <h2>Blog</h2>
-                            <ul>
-                                <li><a href="#">Right Sidebar</a></li>
-                                <li><a href="#">Left Sidebar</a></li>
-                                <li><a href="#">Full Width </a></li>
-                                <li><a href="#">Blog Grid </a></li>
-                                <li><a href="#">Blog Details </a></li>
-                            </ul>
-                        </div>
-                        <div class="footer-col">
-                            <h2>Appointment</h2>
-                            <p>Lorem ipsum dolor, sit amet consectetur<br>
-                                adipisicing elit. nemo obcaecati.</p>
-                            <div class="social-links">
-                                <a href="#"><i class="fab fa-facebook-f"></i></a>
-                                <a href="#"><i class="fab fa-twitter"></i></a>
-                                <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                                <a href="#"><i class="fab fa-google-plus"></i></a>
-                                <a href="#"><i class="fab fa-youtube"></i></a>
-                            </div>
-                        </div>
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="row">
+                    <div class="footer-col">
+                        <h2>Location</h2>
+                        <span><h5>Address:</h5>
+                            Pakistan Kamra Rd,<br>
+                            Attock City, 43600<br><br></span>
+                        <span><h5>Phone:</h5>(750) 435-6352</span>
+                        <span><h5>Fax:</h5>(750) 435-6352</span>
                     </div>
-
-                    <hr>
-                    <div class="copyright">
-                        <span>©️ 2023 BrainMentor. All rights reserved.</span>
+                    <div class="footer-col">
+                        <h2>Blog</h2>
+                        <ul>
+                            <li><a href="#">Right Sidebar</a></li>
+                            <li><a href="#">Left Sidebar</a></li>
+                            <li><a href="#">Full Width </a></li>
+                            <li><a href="#">Blog Grid </a></li>
+                            <li><a href="#">Blog Details </a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-col">
+                        <h2>Appointment</h2>
+                        <p>Lorem ipsum dolor, sit amet consectetur<br>
+                            adipisicing elit. nemo obcaecati.</p>
+                        <div class="social-links">
+                            <a href="#"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#"><i class="fab fa-twitter"></i></a>
+                            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="#"><i class="fab fa-google-plus"></i></a>
+                            <a href="#"><i class="fab fa-youtube"></i></a>
+                        </div>
                     </div>
                 </div>
-            </footer>
-
-        </main>
-        <script
-            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
-            crossorigin="anonymous"></script>
-            <script>
-                document.addEventListener("DOMContentLoaded", function() {
-                    var links = document.querySelectorAll("#menu a");
-                    
-                    // Add click event listener to each link
-                    links.forEach(function(link) {
-                        link.addEventListener("click", function(event) {
-                            // Remove "active" class from all links
-                            links.forEach(function(otherLink) {
-                                otherLink.classList.remove("active");
-                            });
-            
-                            // Add "active" class to the clicked link
-                            this.classList.add("active");
-                        });
-                    });
-            
-                    // Set initial active link based on the current URL path
-                    var currentPath = window.location.pathname;
-                    links.forEach(function(link) {
-                        // Check if the current URL contains the link's href value
-                        if (currentPath.indexOf(link.getAttribute("href")) !== -1) {
-                            link.classList.add("active");
+    
+                <hr>
+                <div class="copyright">
+                    <span>©️ 2023 BrainMentor. All rights reserved.</span>
+                </div>
+            </div>
+        </footer>
+    
+        <!-- <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                var form = document.getElementById("appointmentForm");
+        
+                form.addEventListener("submit", function(event) {
+                    event.preventDefault();
+        
+                    var inputs = form.querySelectorAll('input[required], select[required]');
+                    var emptyFields = [];
+                    for (var i = 0; i < inputs.length; i++) {
+                        if (!inputs[i].value.trim()) {
+                            emptyFields.push(inputs[i]);
                         }
-                    });
+                    }
+        
+                    if (emptyFields.length > 0) {
+                        emptyFields.forEach(function(field) {
+                            field.classList.add("error");
+                        });
+                        emptyFields[0].focus();
+                        return;
+                    }
+        
+                    // If all fields are filled, submit the form
+                    var xhr = new XMLHttpRequest();
+                    xhr.open("POST", form.action, true);
+                    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === XMLHttpRequest.DONE) {
+                            if (xhr.status === 200) {
+                                // Show modal dialog
+                                var modal = document.getElementById("myModal");
+                                modal.style.display = "block";
+                                document.getElementById("modalTitle").innerText = "Your appointment has been booked!";
+                                document.getElementById("modalMessage").innerText = "Please wait for approval.";
+                            } else {
+                                console.error("Failed to submit form:", xhr.statusText);
+                            }
+                        }
+                    };
+                    xhr.send(new URLSearchParams(new FormData(form)).toString());
                 });
-            </script>
+                
+                // Close modal dialog when OK button is clicked and reload the page
+                document.getElementById("okButton").addEventListener("click", function() {
+                    var modal = document.getElementById("myModal");
+                    modal.style.display = "none";
+                    window.location.reload(); // Reload the page
+                });
+            });
+        </script>
+         -->
 
+         <script>
+            document.addEventListener("DOMContentLoaded", function() {
+    var form = document.getElementById("appointmentForm");
+
+    form.addEventListener("submit", function(event) {
+        event.preventDefault();
+
+        var inputs = form.querySelectorAll('input[required], select[required]');
+        var emptyFields = [];
+        for (var i = 0; i < inputs.length; i++) {
+            if (!inputs[i].value.trim()) {
+                emptyFields.push(inputs[i]);
+            }
+        }
+
+        if (emptyFields.length > 0) {
+            emptyFields.forEach(function(field) {
+                field.classList.add("error");
+            });
+            emptyFields[0].focus();
+            return;
+        }
+
+        // If all fields are filled, submit the form
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", form.action, true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    // Show modal dialog
+                    var modal = document.getElementById("myModal");
+                    modal.style.display = "block";
+
+                    // Display loading spinner and message
+                    var modalContent = document.getElementById("modalContent");
+                    modalContent.innerHTML = `
+                        <div class="spinner-container">
+                            <div class="spinner-border spinner-border-lg" role="status"></div>
+                            <p class="text-lg">Please Be Patient...</p>
+                        </div>
+                    `;
+
+                    // Replace loading spinner with success message after 3 seconds
+                    setTimeout(function() {
+                        modalContent.innerHTML = `
+                            <h2 id="modalTitle">Your appointment has been booked!</h2>
+                            <p id="modalMessage">Please wait for approval.</p>
+                            <button id="okButton">OK</button>
+                        `;
+                    }, 3000);
+                } else {
+                    console.error("Failed to submit form:", xhr.statusText);
+                }
+            }
+        };
+        xhr.send(new URLSearchParams(new FormData(form)).toString());
+    });
+
+    // Close modal dialog when OK button is clicked and reload the page
+    document.getElementById("myModal").addEventListener("click", function(event) {
+        var modal = document.getElementById("myModal");
+        if (event.target === modal || event.target.id === "okButton") {
+            modal.style.display = "none";
+            window.location.reload(); // Reload the page
+        }
+    });
+});
+
+        </script>
+        
+        
+        
+        
+        
+    
     </body>
 
 </html>

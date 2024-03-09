@@ -5,18 +5,15 @@ from flask_login import LoginManager, login_user, UserMixin, logout_user
 from flask_sqlalchemy import SQLAlchemy
 from openai import ChatCompletion
 import folium
-from werkzeug.security import generate_password_hash, check_password_hash
 import numpy as np
 from dateutil import parser
-
+from sqlalchemy import LargeBinary
 import tensorflow as tf
-#from PIL import Image
 import openai
 from authlib.integrations.flask_client import OAuth
 from flask_mail import Mail, Message
 import json
 import requests
-from folium.plugins import Geocoder
 from folium import plugins
 
 
@@ -35,12 +32,94 @@ openai.api_key = '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'
 
 # Provided intents data
 intents_data = {"intents": [
-    {"tag": "greeting",
-     "patterns": ["Hi there", "How are you", "Is anyone there?", "Hey", "Hola", "Hello", "Good day"],
-     "responses": ["Hello, thanks for asking", "Good to see you again", "Hi there, how can I help?"],
-     "context": [""]},
-    # ... (other intent data)
-]}
+        {"tag": "greeting",
+         "patterns": ["Hi there", "How are you", "Is anyone there?","Hey","Hola", "Hello", "Good day"],
+         "responses": ["Hello, thanks for asking", "Good to see you again", "Hi there, how can I help?"],
+         "context": [""]
+        },
+        {"tag": "goodbye",
+         "patterns": ["Bye", "See you later", "Goodbye", "Nice chatting to you, bye", "Till next time"],
+         "responses": ["See you!", "Have a nice day", "Bye! Come back again soon."],
+         "context": [""]
+        },
+        {"tag": "thanks",
+         "patterns": ["Thanks", "Thank you", "That's helpful", "Awesome, thanks", "Thanks for helping me"],
+         "responses": ["Happy to help!", "Any time!", "My pleasure"],
+         "context": [""]
+        },
+        {"tag": "noanswer",
+         "patterns": [],
+         "responses": ["Sorry, can't understand you", "Please give me more info", "Not sure I understand"],
+         "context": [""]
+        },
+
+        {"tag": "options",
+         "patterns": ["How you could help me?"],
+         "responses": ["Hello! I'm here to assist you with information related to brain tumors, treatments and medical professionals"],
+         "context": [""]
+        },
+        {"tag": "options",
+         "patterns": ["What are the common symptoms of a brain tumor?"],
+         "responses": ["Common symptoms include headaches, seizures, changes in vision, and cognitive issues."],
+         "context": [""]
+        },
+
+         {"tag": "options",
+         "patterns": ["Can you explain the different types of brain tumors?"],
+         "responses": ["Brain tumors can be primary & They are classified by location and cell type."],
+         "context": [""]
+        },
+
+           {"tag": "options",
+         "patterns": ["What are the available treatment options for brain tumors?"],
+         "responses": ["Treatment may include surgery, radiation therapy, chemotherapy, and targeted therapy."],
+         "context": [""]
+        },
+
+        {"tag": "doctors",
+         "patterns": [" How can I find a neurosurgeon near me?","Can you provide any motivational resources related to tumor?"],
+         "responses": ["You can find a neurosurgeon on doctor section","Sure! you can check our Blog section to read blogs and posts"],
+         "context": ["doctors"]
+        },
+
+           {"tag": "tumors",
+         "patterns": ["What are the four stages of brain tumor?"],
+         "responses": ["Stage I: Low Grade (Benign) Stage II: Low to Intermediate Grade Stage III: High Grade (Malignant) Stage IV: High Grade (Malignant)"],
+         "context": ["tumors"]
+        },
+
+        
+           {"tag": "tumors",
+         "patterns": ["Can you explain the difference between benign and malignant brain tumors?"],
+         "responses": ["Benign tumors are non-cancerous and usually less aggressive, while malignant tumors are cancerous and can spread."],
+         "context": ["tumors"]
+        },
+
+        
+           {"tag": "tumors",
+         "patterns": ["What should I do if I suspect a brain tumor?"],
+         "responses": ["Seek medical attention immediately. Early detection is crucial for treatment."],
+         "context": ["tumors"]
+        },
+        {"tag": "appointment",
+         "patterns": ["What information do I need to provide when booking a medical appointment?"],
+         "responses": [" Typically, you'll need your personal information, insurance details, and a description of your medical concern."],
+         "context": ["appointment"]
+        },
+
+         {"tag": "appointment",
+         "patterns": ["Can I request a specific date and time for my appointment?"],
+         "responses": ["Yes, you can request a preferred date and time, and we'll check for availability."],
+         "context": ["appointment"]
+        },
+
+         {"tag": "appointment",
+         "patterns": ["Can I have a video consultation with a brain tumor specialist?"],
+         "responses": ["Yes, we can help you schedule a video consultation with a qualified specialist."],
+         "context": ["appointment"]
+        }
+   ]
+}
 
 # Function to handle known intents
 def handle_known_intent(intent, patterns):
@@ -81,7 +160,6 @@ def get_response():
     response = chatbot(user_query)
     return jsonify({'response': response})
 
-# ... (remaining code, User Model, Blogs Model, routes, etc.)
 
 # Create a Model of User
 class Patients(UserMixin, db.Model):
@@ -93,13 +171,13 @@ class Patients(UserMixin, db.Model):
     def __repr__(self):
         return '<User %r>' % self.username
 
-# Create a Model of Blogs
 class Blogs(db.Model):
     blog_id = db.Column(db.Integer, primary_key=True)
     blog_type = db.Column(db.String(80), nullable=False)
     tit_name = db.Column(db.String(80), nullable=False)
     author = db.Column(db.String(40), nullable=False)
     content = db.Column(db.Text(), nullable=False)
+    image_data = db.Column(LargeBinary, nullable=False)  # Add image field
     pub_date = db.Column(db.DateTime(), nullable=False,
                          default=datetime.datetime.utcnow)
 
@@ -107,13 +185,11 @@ class Blogs(db.Model):
         return '<Blogs %r>' % self.tit_name
 
 # User Loader Function
-
-
 @login_manager.user_loader
 def load_user(user_id):
     return Patients.query.get(int(user_id))
 
-
+# User Signup/Login Function
 @app.route('/', methods=["GET", "POST"])
 def index():
     if request.method == 'POST':
@@ -157,17 +233,31 @@ def index():
 
     return render_template('index.html')
 
+#Logout User
 @app.route('/logout')
 def logout():
     logout_user()
     session.pop("user", None)
     return redirect('/')
 
-#SigninWithGoogle
+import base64
+from flask import render_template
+
+
+# Sign in with Google
 @app.route('/home')
 def Home():
-    blogss = Blogs.query.all()
-    return render_template('Home.html', blogs=blogss, session=session.get("user"), pretty=json.dumps(session.get("user"), indent=4))
+    blogs = Blogs.query.all()
+
+    # Convert images to Base64
+    for blog in blogs:
+        if blog.image_data:
+            blog.base64_image = base64.b64encode(blog.image_data).decode('utf-8')
+        else:
+            blog.base64_image = None
+
+    return render_template('Home.html', blogs=blogs, session=session.get("user"), pretty=json.dumps(session.get("user"), indent=4))
+
 
 appConf = {
     "OAUTH2_CLIENT_ID": "552872142229-vufan07358j75rr54k9l2u4ibrmpt8dn.apps.googleusercontent.com",
@@ -232,7 +322,7 @@ def googleCallback():
 def send_welcome_email(email):
     msg = Message("BrainMentor: Your Path to Brain Health and Wellness",
                   recipients=[email])
-    msg.body = "Welcome to BrainMentor! 🧠🌐 Our advanced web app uses Deep Learning and Image Processing to detect brain tumors swiftly. Beyond detection, we offer localization, doctor appointments, and a chatbot for valuable insights. Explore video consultations, physician finders, and more. Your journey to a healthier future starts here!"
+    msg.body = "Welcome to BrainMentor! 🧠🌐 Our advanced web app uses Deep Learning and Image Processing to detect brain tumors swiftly. Beyond detection, doctor appointments, and a chatbot for valuable insights. Explore video consultations, physician finders, and more. Your journey to a healthier future starts here!"
     mail.send(msg)
 
 @app.route("/google-login")
@@ -240,9 +330,6 @@ def googleLogin():
     if "user" in session:
         abort(404)
     return oauth.myApp.authorize_redirect(redirect_uri=url_for("googleCallback", _external=True))
-
-
-#/////////////////////////////////////////////////////////////////////////////
 
 
 @app.route('/patient_signup')
@@ -445,58 +532,112 @@ def Doctors_Markers():
 
     return map._repr_html_()
 
+from flask import request, redirect, render_template, flash
+from werkzeug.utils import secure_filename
+import os
+import datetime
 
+UPLOAD_FOLDER = 'static/uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
-# Blog Post
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Function to check if the file extension is allowed
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 @app.route('/blog', methods=["GET", "POST"])
 def Blog():
     if request.method == 'POST':
         type = request.form.get('type')
         title = request.form.get('title')
         author = request.form.get('author')
-        content = request.form.get('text')
-        blog = Blogs(blog_type=type, tit_name=title,
-                     author=author, content=content)
-        db.session.add(blog)
-        db.session.commit()
-        flash('Post Sucessfully Created', 'success')
-        return redirect('/home')
+        content = request.form.get('content')
+        
+        # Check if the post request has the file part
+        if 'image' not in request.files:
+            flash(' No file part', 'error')
+            return redirect(request.url)
+        
+        file = request.files['image']
+        
+        # If the user does not select a file, the browser submits an empty file without a filename
+        if file.filename == '':
+            flash( 'No selected file', 'error')
+            return redirect(request.url)
+        
+        # Check if the file extension is allowed
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            
+            # Read image file as binary data
+            with open(file_path, 'rb') as f:
+                image_data = f.read()
+            
+            # Debug statement to print the first few characters of image_data
+            print("First few characters of image_data:", image_data[:20])  # Print the first 20 characters
+            
+            # Create the blog post with the image binary data
+            blog = Blogs(blog_type=type, tit_name=title,
+                         author=author, content=content, image_data=image_data)
+            db.session.add(blog)
+            db.session.commit()
+            flash(' Blog Sucessfully Created', 'success')
+            return redirect('/home')
+        else:
+            flash(' Invalid file format', 'error')
+            return redirect(request.url)
+    
     return render_template('Blogs.html')
 
-# Read Blog
 
-
-@app.route("/blogs_deatil/<int:id>")
-def blogs_details(id):
+# Routes
+@app.route("/blogs_detail/<int:id>")
+def blogs_detail(id):
     blog = Blogs.query.get(id)
-    return render_template('Blogs_Details.html', blog=blog)
 
-# Delete Blog
+    if blog.image_data:
+        blog.base64_image = base64.b64encode(blog.image_data).decode('utf-8')
+    else:
+        blog.base64_image = None
+    return render_template('View_Blog.html', blog=blog)
+
 @app.route("/delete/<int:id>")
 def del_post(id):
     blog = Blogs.query.get(id)
     db.session.delete(blog)
     db.session.commit()
-    flash('Your Post Has Been Sucessfully Deleted', 'success')
+    flash(' Your Post Has Been Successfully Deleted', 'success')
     return redirect('/home')
-
-# Edit Blog
-
 
 @app.route("/edit/<int:id>", methods=['GET', 'POST'])
 def edit_post(id):
     blog = Blogs.query.get(id)
     if request.method == 'POST':
+        blog.blog_type = request.form.get('type')  # Update the field name to match your model
         blog.tit_name = request.form.get('title')
         blog.author = request.form.get('author')
-        blog.content = request.form.get('text')
+        blog.content = request.form.get('content')  # Update the field name to match your model
+        if 'image' in request.files:
+            file = request.files['image']
+            if file.filename != '':
+                if allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    file.save(file_path)
+                    with open(file_path, 'rb') as f:
+                        image_data = f.read()
+                    blog.image_data = image_data
+                else:
+                    flash('Invalid file format', 'error')
+                    return redirect(request.url)
         db.session.commit()
-        flash('Your Post Has Been Sucessfully Edit', 'success')
+        flash(' Your Post Has Been Successfully Update', 'success')
         return redirect('/home')
-    return render_template('Edit_post.html', blog=blog)
+    return render_template('edit_post.html', blog=blog)
 
-
-from sqlalchemy import create_engine, MetaData
 
 
 # Fetching doctors appointments informaton  from the database and passing json
@@ -526,15 +667,79 @@ def get_appointments():
 def add_doctor():
     # Create a new doctor
     doctor_data = [
-        {'name': 'Alice', 'designation': 'Pediatrician', 'age': 35, 'country': 'Pakistan', 'email': 'alice@example.com',
-         'password': 'password123'},
-        {'name': 'Bob', 'designation': 'Surgeon', 'age': 40, 'country': 'Pakistan', 'email': 'bob@example.com',
-         'password': 'password456'},
-        {'name': 'Emma', 'designation': 'Cardiologist', 'age': 45, 'country': 'Pakistan', 'email': 'emma@example.com',
-         'password': 'password789'},
-        {'name': 'David', 'designation': 'Gynecologist', 'age': 50, 'country': 'Pakistan', 'email': 'david@example.com',
-         'password': 'passwordABC'}
-    ]
+    {
+        "name": "Dr. Aisha Khan",
+        "designation": "Neurologist",
+        "age": 42,
+        "country": "Pakistan",
+        "email": "aisha@example.com",
+        "password": "neuro123"
+    },
+    {
+        "name": "Dr. Hassan Ali",
+        "designation": "Cardiologist",
+        "age": 39,
+        "country": "Pakistan",
+        "email": "hassan@example.com",
+        "password": "cardiodoc456"
+    },
+    {
+        "name": "Dr. Fatima Ahmed",
+        "designation": "Dermatologist",
+        "age": 37,
+        "country": "Pakistan",
+        "email": "fatima@example.com",
+        "password": "skinexpert789"
+    },
+    {
+        "name": "Dr. Usman Khan",
+        "designation": "Gastroenterologist",
+        "age": 45,
+        "country": "Pakistan",
+        "email": "usman@example.com",
+        "password": "gastro456"
+    },
+    {
+        "name": "Dr. Sana Malik",
+        "designation": "Pediatrician",
+        "age": 41,
+        "country": "Pakistan",
+        "email": "sana@example.com",
+        "password": "pediatrics789"
+    },
+    {
+        "name": "Dr. Ali Raza",
+        "designation": "Orthopedic Surgeon",
+        "age": 48,
+        "country": "Pakistan",
+        "email": "ali@example.com",
+        "password": "ortho123"
+    },
+    {
+        "name": "Dr. Zainab Ahmed",
+        "designation": "Ophthalmologist",
+        "age": 43,
+        "country": "Pakistan",
+        "email": "zainab@example.com",
+        "password": "eyeexpert456"
+    },
+    {
+        "name": "Dr. Bilal Khan",
+        "designation": "Psychiatrist",
+        "age": 40,
+        "country": "Pakistan",
+        "email": "bilal@example.com",
+        "password": "minddoc123"
+    },
+    {
+        "name": "Dr. Sara Ali",
+        "designation": "Obstetrician/Gynecologist",
+        "age": 36,
+        "country": "Pakistan",
+        "email": "sara@example.com",
+        "password": "obgyn456"
+    }
+]
 
     for obj in doctor_data:
         new_doctor = web_user(name=obj['name'], designation=obj['designation'], age=obj['age'], country=obj['country'], email=obj['email'], password=obj['password'])
@@ -596,15 +801,13 @@ def make_appointment():
 
     new_appointment = patient_appointments(name=name, doctor_id=doctor_id, email=email, number=number, date=date, timeslot=time_slot, consultation=consultation)
 
-        # Add the new doctor to the database session
+    # Add the new doctor to the database session
     db.session.add(new_appointment)
 
     # Commit the session to save changes to the database
     db.session.commit()
 
-    flash(' Your Appointment has successfully Booked', 'success')
     return redirect(url_for("Appointment"))
-
 
 
 # Define  database model for the doctor
